@@ -68,17 +68,13 @@ Plots.ylabel!("Difference in Occupied-Exposure")
 """
 
 
-
-
-range(1000,2000, step = 1)
-
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    breach_null = 0.45)
+    pop_growth = 0, breach_null = 0.45)
     seed_range = seed_range
 
     models = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
-    models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, seed = i) for i in seed_range]
+    models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
     _ = ensemblerun!(models, agent_step!, model_step!, 50, agents_first = false)
     _ = ensemblerun!(models_levee, agent_step!, model_step!, 50, agents_first = false)
