@@ -83,18 +83,18 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     #Create matrix to store 
     occupied = zeros(length(flood_rps),length(seed_range))
     occupied_levee = copy(occupied)
+    #Calculate depth difference for each model in category
     for i in eachindex(models)
         occupied[:,i] = depth_difference(models[i], flood_rps)
-    end
-
-    for i in eachindex(models_levee)
         occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps; breach_null = breach_null)
     end
 
     #Take difference of two matrices
     occ_diff = occupied_levee - occupied
-
+    #Calculate median and 95% Uncertainty interval
     occ_med = mapslices(x -> median(x), occ_diff, dims=2)
     occ_quantiles = mapslices(x -> quantile(x, [0.025, 0.975]), occ_diff, dims=2)
-    return occ_med, occ_quantiles
+    #Save results to DataFrame
+    occ_df = DataFrame(return_period = [ i for i in flood_rps], median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
+    return occ_df
 end
