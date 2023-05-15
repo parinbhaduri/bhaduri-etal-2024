@@ -4,6 +4,8 @@ include("../../flood-risk-abm/src/base_model.jl")
 #Define plot attributes
 include("../../flood-risk-abm/src/visual_attrs.jl")
 
+using CSV
+
 function depth_difference(model::ABM, flood_rps; breach_null = 0.45)
     occupied_feet = []
     for rp in flood_rps
@@ -73,7 +75,7 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     pop_growth = 0, breach_null = 0.45)
     seed_range = seed_range
 
-    models = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
+    models = [flood_ABM(Elev; risk_averse = risk_averse, pop_growth = pop_growth, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
     models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
     _ = ensemblerun!(models, agent_step!, model_step!, 50, agents_first = false)

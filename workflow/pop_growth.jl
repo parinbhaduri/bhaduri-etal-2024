@@ -19,16 +19,17 @@ occ_pop_5[!, "group"] .= 5.0
 occ_pop = vcat(occ_pop_05,occ_pop_1,occ_pop_2,occ_pop_5)
 
 #Save/open dataframe
-#CSV.write("workflow/dataframes/occ_pop.csv", occ_pop)
+CSV.write("workflow/dataframes/occ_pop.csv", occ_pop)
 #occ_pop = DataFrame(CSV.File("workflow/dataframes/occ_pop.csv"))
 
 threshold = zeros(length(flood_rps))
 #Plot results
-Plots.plot(occ_pop[:, "return_period"], occ_pop.median, group = occ_pop.group, linecolor = ["blue" "orange" "green" "purple"],
+breach_pop = Plots.plot(occ_pop[:, "return_period"], occ_pop.median, group = occ_pop.group, linecolor = ["blue" "orange" "green" "purple"],
 lw = 2.5, xscale = :log10, xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10))
 Plots.plot!(occ_pop[:, "return_period"], occ_pop.LB, fillrange= occ_pop.RB, group = occ_pop.group,
  linecolor = ["blue" "orange" "green" "purple"], fillcolor = ["blue" "orange" "green" "purple"], fillalpha=0.35, alpha =0.35, label=false)
-Plots.xlabel!("Return Period")
+ Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
+ Plots.xlabel!("Return Period")
 Plots.ylabel!("Difference in Occupied-Exposure")
 
 
