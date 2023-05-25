@@ -12,25 +12,25 @@ occ_high = risk_shift(Elevation, seed_range; breach_null = 0.5)
 
 threshold = zeros(length(flood_rps))
 #Plot results
-breach_low = Plots.plot(flood_rps, occ_low[1], linecolor = "blue", lw = 2.5, xscale = :log10,
+breach_low = Plots.plot(flood_rps, occ_low.median, linecolor = "blue", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10),  label = false)
-Plots.plot!(flood_rps, occ_low[2][:,1], fillrange=occ_low[2][:,2], linecolor = "blue", fillcolor = "blue",
+Plots.plot!(flood_rps, occ_low.LB, fillrange=occ_low.RB, linecolor = "blue", fillcolor = "blue",
  fillalpha=0.35, alpha =0.35, label=false)
 Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 #Plots.xlabel!("Return Period")
 #Plots.ylabel!("Difference in Occupied-Exposure")
 
-breach_med = Plots.plot(flood_rps, occ_med[1], linecolor = "orange", lw = 2.5, xscale = :log10,
+breach_med = Plots.plot(flood_rps, occ_med.median, linecolor = "orange", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10), label = false)
-Plots.plot!(flood_rps, occ_med[2][:,1], fillrange=occ_med[2][:,2], linecolor = "orange", fillcolor = "orange",
+Plots.plot!(flood_rps, occ_med.LB, fillrange=occ_med.RB, linecolor = "orange", fillcolor = "orange",
  fillalpha=0.35, alpha =0.35, label=false)
  Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 #Plots.xlabel!("Return Period")
 Plots.ylabel!("Difference in Occupied-Exposure", fontsize = 45)
 
-breach_high = Plots.plot(flood_rps, occ_high[1], linecolor = "green", lw = 2.5, xscale = :log10,
+breach_high = Plots.plot(flood_rps, occ_high.median, linecolor = "green", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10), label = false)
-Plots.plot!(flood_rps, occ_high[2][:,1], fillrange=occ_high[2][:,2], linecolor = "green", fillcolor = "green",
+Plots.plot!(flood_rps, occ_high.LB, fillrange=occ_high.RB, linecolor = "green", fillcolor = "green",
  fillalpha=0.35, alpha =0.35, label=false)
  Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 Plots.xlabel!("Return Period (Years)")

@@ -14,13 +14,16 @@ occ_low[!, "group"] .= "low"
 occ_averse = vcat(occ_high,occ_low)
 
 #Save/open dataframe
-#CSV.write("workflow/dataframes/occ_averse.csv", occ_averse)
-occ_averse = DataFrame(CSV.File("workflow/dataframes/occ_averse.csv"))
+CSV.write("workflow/dataframes/occ_averse.csv", occ_averse)
+#occ_averse = DataFrame(CSV.File("workflow/dataframes/occ_averse.csv"))
 
+
+threshold = zeros(length(flood_rps))
 #Plot results
 Plots.plot(occ_averse[:, "return_period"], occ_averse.median, group = occ_averse.group, lw = 2.5, xscale = :log10, 
 xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10))
 Plots.plot!(occ_averse[:, "return_period"], occ_averse.LB, fillrange= occ_averse.RB, group = occ_averse.group,
  linecolor = ["blue" "orange"], fillcolor = ["blue" "orange"], fillalpha=0.35, alpha =0.35, label=false)
+Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 Plots.xlabel!("Return Period")
 Plots.ylabel!("Difference in Occupied-Exposure")
