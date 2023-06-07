@@ -10,6 +10,19 @@ occ_med = risk_shift(Elevation, seed_range)
 #high
 occ_high = risk_shift(Elevation, seed_range; breach_null = 0.5)
 
+#Join two dataframes and savefig
+occ_low[!, "group"] .= "low"
+occ_med[!, "group"] .= "middle"
+occ_high[!, "group"] .= "high"
+
+
+occ_breach = vcat(occ_low,occ_med,occ_high)
+
+#Save/open dataframe
+CSV.write("workflow/dataframes/occ_breach.csv", occ_breach)
+#occ_pop = DataFrame(CSV.File("workflow/dataframes/occ_pop.csv"))
+
+
 threshold = zeros(length(flood_rps))
 #Plot results
 breach_low = Plots.plot(flood_rps, occ_low.median, linecolor = "blue", lw = 2.5, xscale = :log10,
