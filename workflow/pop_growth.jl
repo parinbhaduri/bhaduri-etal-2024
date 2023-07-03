@@ -19,8 +19,8 @@ occ_pop_5[!, "group"] .= 5.0
 occ_pop = vcat(occ_pop_05,occ_pop_1,occ_pop_2,occ_pop_5)
 
 #Save/open dataframe
-#CSV.write("workflow/dataframes/occ_pop.csv", occ_pop)
-occ_pop = DataFrame(CSV.File("workflow/dataframes/occ_pop.csv"))
+CSV.write("workflow/dataframes/occ_pop.csv", occ_pop)
+#occ_pop = DataFrame(CSV.File("workflow/dataframes/occ_pop.csv"))
 
 threshold = zeros(length(flood_rps))
 #Plot results

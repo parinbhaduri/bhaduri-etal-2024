@@ -14,8 +14,8 @@ occ_low[!, "group"] .= "low"
 occ_averse = vcat(occ_high,occ_low)
 
 #Save/open dataframe
-CSV.write("workflow/dataframes/occ_averse.csv", occ_averse)
-#occ_averse = DataFrame(CSV.File("workflow/dataframes/occ_averse.csv"))
+#CSV.write("workflow/dataframes/occ_averse.csv", occ_averse)
+occ_averse = DataFrame(CSV.File("workflow/dataframes/occ_averse.csv"))
 
 
 threshold = zeros(length(flood_rps))
