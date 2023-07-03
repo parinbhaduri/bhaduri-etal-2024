@@ -29,3 +29,53 @@ Plots.xlabel!("Return Period")
 Plots.ylabel!("Difference in Occupied-Exposure")
 
 savefig(breach_averse, "figures/breach_averse.svg")
+
+
+
+
+
+### Look at individual cumulative exposure curves
+
+models = [flood_ABM(Elevation; flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
+models_levee = [flood_ABM(Elevation; flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = 1/100, breach = true, seed = i) for i in seed_range]
+#Run models
+_ = ensemblerun!(models, dummystep, combine_step!, 50)
+_ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
+
+flood_rps = range(10,1000, step = 10)
+#Create matrix to store 
+occupied = zeros(length(flood_rps),length(seed_range))
+occupied_levee = copy(occupied)
+#Calculate depth difference for each model in category
+for i in eachindex(models)
+    occupied[:,i] = depth_difference(models[i], flood_rps)
+    occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps)
+end
+
+occ_med = mapslices(x -> median(x), occupied, dims=2)
+occ_med_levee = mapslices(x -> median(x), occupied_levee, dims=2)
+
+Plots.plot(collect(flood_rps), [occ_med occ_med_levee], xscale = :log10)
+
+
+
+models_low = [flood_ABM(Elevation; risk_averse = 0.7, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
+models_levee_low = [flood_ABM(Elevation; risk_averse = 0.7, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = 1/100, breach = true, seed = i) for i in seed_range]
+#Run models
+_ = ensemblerun!(models_low, dummystep, combine_step!, 50)
+_ = ensemblerun!(models_levee_low, dummystep, combine_step!, 50)
+
+flood_rps = range(10,1000, step = 10)
+#Create matrix to store 
+occupied_low = zeros(length(flood_rps),length(seed_range))
+occupied_levee_low = copy(occupied)
+#Calculate depth difference for each model in category
+for i in eachindex(models_low)
+    occupied_low[:,i] = depth_difference(models_low[i], flood_rps)
+    occupied_levee_low[:,i] = depth_difference(models_levee_low[i], flood_rps)
+end
+
+occ_med_low = mapslices(x -> median(x), occupied_low, dims=2)
+occ_med_levee_low = mapslices(x -> median(x), occupied_levee_low, dims=2)
+
+Plots.plot!(collect(flood_rps), [occ_med_low occ_med_levee_low], xscale = :log10)
