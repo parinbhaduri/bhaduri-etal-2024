@@ -1,7 +1,7 @@
 include("damage_realizations.jl")
 """File used for profiling risk_shift function"""
 
-seed_range = range(1000, 1020, step = 1)
+seed_range = range(1000, 1250, step = 1)
 flood_rps = range(10,1000, step = 10)
 
 #run once for compilation
@@ -27,7 +27,7 @@ function test_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     end
     #Run models
     @timeit tmr "model runs" begin 
-        _ = ensemblerun!([models models_levee], agent_step!, model_step!, 50, agents_first = false)
+        _ = ensemblerun!([models models_levee], dummystep, combine_step!, 50, agents_first = false)
         #_ = ensemblerun!(models_levee, agent_step!, model_step!, 50, agents_first = false)
     end
 
@@ -58,7 +58,8 @@ end
 
 #Time individual sections within function
 test_shift(Elevation, seed_range)
-
+show(tmr)
+reset_timer!(tmr)
 #scalability
 for n in [1010, 1050, 1250, 1750]
     seed_range = range(1000, n, step = 1)

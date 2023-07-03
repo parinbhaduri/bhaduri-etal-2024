@@ -114,8 +114,8 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, pop_growth = pop_growth, seed = i) for i in seed_range]
     models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
-    _ = ensemblerun!(models, agent_step!, model_step!, 50, agents_first = false)
-    _ = ensemblerun!(models_levee, agent_step!, model_step!, 50, agents_first = false)
+    _ = ensemblerun!(models, dummystep, combine_step!, 50)
+    _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
 
     flood_rps = range(10,1000, step = 10)
     #Create matrix to store 
