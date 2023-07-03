@@ -111,8 +111,8 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     pop_growth = 0, breach_null = 0.45)
     seed_range = seed_range
 
-    models = [flood_ABM(Elev; risk_averse = risk_averse, pop_growth = pop_growth, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
-    models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
     _ = ensemblerun!(models, dummystep, combine_step!, 50)
     _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
@@ -143,7 +143,7 @@ function risk_sat_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, brea
     """Use with depth_sat_difference function"""
     seed_range = seed_range
     #Only need levee models
-    models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
     _ = ensemblerun!(models_levee, agent_step!, model_step!, 50, agents_first = false)
 
