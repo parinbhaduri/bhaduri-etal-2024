@@ -36,8 +36,8 @@ savefig(breach_averse, "figures/breach_averse.svg")
 
 ### Look at individual cumulative exposure curves
 
-models = [flood_ABM(Elevation; flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
-models_levee = [flood_ABM(Elevation; flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = 1/100, breach = true, seed = i) for i in seed_range]
+models = [flood_ABM(;Elev = Elevation, seed = i) for i in seed_range]
+models_levee = [flood_ABM(;Elev = Elevation, levee = 1/100, breach = true, seed = i) for i in seed_range]
 #Run models
 _ = ensemblerun!(models, dummystep, combine_step!, 50)
 _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
@@ -55,12 +55,12 @@ end
 occ_med = mapslices(x -> median(x), occupied, dims=2)
 occ_med_levee = mapslices(x -> median(x), occupied_levee, dims=2)
 
-Plots.plot(collect(flood_rps), [occ_med occ_med_levee], xscale = :log10)
+Plots.plot(collect(flood_rps), [occ_med occ_med_levee], xscale = :log10, labels = ["no levee (high)" "levee (high)"])
 
 
 
-models_low = [flood_ABM(Elevation; risk_averse = 0.7, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
-models_levee_low = [flood_ABM(Elevation; risk_averse = 0.7, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = 1/100, breach = true, seed = i) for i in seed_range]
+models_low = [flood_ABM(;Elev = Elevation, risk_averse = 0.7, seed = i) for i in seed_range]
+models_levee_low = [flood_ABM(;Elev = Elevation, risk_averse = 0.7, levee = 1/100, breach = true, seed = i) for i in seed_range]
 #Run models
 _ = ensemblerun!(models_low, dummystep, combine_step!, 50)
 _ = ensemblerun!(models_levee_low, dummystep, combine_step!, 50)
@@ -78,4 +78,4 @@ end
 occ_med_low = mapslices(x -> median(x), occupied_low, dims=2)
 occ_med_levee_low = mapslices(x -> median(x), occupied_levee_low, dims=2)
 
-Plots.plot!(collect(flood_rps), [occ_med_low occ_med_levee_low], xscale = :log10)
+Plots.plot!(collect(flood_rps), [occ_med_low occ_med_levee_low], xscale = :log10, labels = ["no levee (low)" "levee (low)"])
