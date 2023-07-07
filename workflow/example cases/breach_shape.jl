@@ -1,5 +1,5 @@
 #Compares risk shifting properties among variations in levee breach curve shape
-include("damage_realizations.jl")
+include("../damage_realizations.jl")
 
 seed_range = range(1000, 2000, step = 1)
 flood_rps = range(10,1000, step = 10)

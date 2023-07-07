@@ -1,4 +1,4 @@
-include("damage_realizations.jl")
+include("../damage_realizations.jl")
 ## Create Elevation Matrix for study area:
 grid_length = 44
 
