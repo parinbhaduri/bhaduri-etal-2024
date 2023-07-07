@@ -1,8 +1,10 @@
-#Compares risk shifting properties between low risk and high risk aversion populations
-include("damage_realizations.jl")
+
+include("../damage_realizations.jl")
 
 seed_range = range(1000, 2000, step = 1)
 flood_rps = range(10,1000, step = 10)
+
+##Compares risk shifting properties between low risk and high risk aversion populations
 #high risk aversion
 occ_high = risk_shift(Elevation, seed_range)
 occ_low = risk_shift(Elevation, seed_range; risk_averse = 0.7)
@@ -31,10 +33,13 @@ Plots.ylabel!("Difference in Occupied-Exposure")
 savefig(breach_averse, "figures/breach_averse.svg")
 
 
+## Calculate integral of risk shifting curves
+occ_high_sum = risk_shift(Elevation, seed_range; metric = "integral")
+occ_low_sum = risk_shift(Elevation, seed_range; risk_averse = 0.7, metric = "integral")
 
+#Plot sums
 
-
-### Look at individual cumulative exposure curves
+## Look at individual cumulative exposure curves
 
 models = [flood_ABM(;Elev = Elevation, seed = i) for i in seed_range]
 models_levee = [flood_ABM(;Elev = Elevation, levee = 1/100, breach = true, seed = i) for i in seed_range]

@@ -4,7 +4,7 @@ include("../../flood-risk-abm/src/base_model.jl")
 #Define plot attributes
 include("../../flood-risk-abm/src/visual_attrs.jl")
 
-using CSV
+using LinearAlgebra
 
 function depth_difference(model::ABM, flood_rps; breach_null = 0.45)
     occupied_feet = []
@@ -108,7 +108,7 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0, breach_null = 0.45)
+    pop_growth = 0, breach_null = 0.45, metric = "df")
     seed_range = seed_range
 
     models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, pop_growth = pop_growth, seed = i) for i in seed_range]
@@ -129,12 +129,20 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
 
     #Take difference of two matrices
     occ_diff = occupied_levee - occupied
-    #Calculate median and 95% Uncertainty interval
-    occ_med = mapslices(x -> median(x), occ_diff, dims=2)
-    occ_quantiles = mapslices(x -> quantile(x, [0.025, 0.975]), occ_diff, dims=2)
-    #Save results to DataFrame
-    occ_df = DataFrame(return_period = [ i for i in flood_rps], median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
-    return occ_df
+    if metric == "df"
+        #Calculate median and 95% Uncertainty interval
+        occ_med = mapslices(x -> median(x), occ_diff, dims=2)
+        occ_quantiles = mapslices(x -> quantile(x, [0.025, 0.975]), occ_diff, dims=2)
+        #Save results to DataFrame
+        occ_df = DataFrame(return_period = collect(flood_rps), median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
+        return occ_df
+
+    elseif metric == "integral"
+        #divide the occupied depth differences by the return period
+        #sum the columns to return the integral 
+        occ_sum = sum(occ_diff ./ collect(flood_rps); dims = 1)
+        return occ_sum
+    end
 end
 
 
