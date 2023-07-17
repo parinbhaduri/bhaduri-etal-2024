@@ -4,7 +4,7 @@ include("../damage_realizations.jl")
 seed_range = range(1000, 2000, step = 1)
 flood_rps = range(10,1000, step = 10)
 #Low
-occ_low = risk_shift(Elevation, seed_range; breach_null = 0.3)
+occ_low = risk_shift(Elevation, seed_range; breach = false, breach_null = 0.3)
 #medium
 occ_med = risk_shift(Elevation, seed_range)
 #high
@@ -30,6 +30,7 @@ breach_low = Plots.plot(flood_rps, occ_low.median, linecolor = "blue", lw = 2.5,
 Plots.plot!(flood_rps, occ_low.LB, fillrange=occ_low.RB, linecolor = "blue", fillcolor = "blue",
  fillalpha=0.35, alpha =0.35, label=false)
 Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
+Plots.title!("Risk shifting: high RA, no breaching")
 #Plots.xlabel!("Return Period")
 #Plots.ylabel!("Difference in Occupied-Exposure")
 

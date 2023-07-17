@@ -7,6 +7,7 @@ flood_rps = range(10,1000, step = 10)
 ##Compares risk shifting properties between low risk and high risk aversion populations
 #high risk aversion
 occ_high = risk_shift(Elevation, seed_range)
+#low risk aversion
 occ_low = risk_shift(Elevation, seed_range; risk_averse = 0.7)
 
 #Join two dataframes and savefig
@@ -37,7 +38,13 @@ savefig(breach_averse, "figures/breach_averse.svg")
 occ_high_sum = risk_shift(Elevation, seed_range; metric = "integral")
 occ_low_sum = risk_shift(Elevation, seed_range; risk_averse = 0.7, metric = "integral")
 
+
 #Plot sums
+using StatsPlots
+
+Plots.boxplot([repeat(["high"],1001) repeat(["low"],1001)], [occ_high_sum' occ_low_sum'], legend = false)
+
+
 
 ## Look at individual cumulative exposure curves
 

@@ -108,11 +108,10 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0, breach_null = 0.45, metric = "df")
-    seed_range = seed_range
+    pop_growth = 0, breach_null = 0.45, N = 1200, metric = "df")
 
-    models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, pop_growth = pop_growth, seed = i) for i in seed_range]
-    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
     _ = ensemblerun!(models, dummystep, combine_step!, 50)
     _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
@@ -127,21 +126,22 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
         occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps; breach_null = breach_null)
     end
 
-    #Take difference of two matrices
-    occ_diff = occupied_levee - occupied
-    if metric == "df"
+    if metric == "integral"
+        #divide levee scenario by no levee scenario to get exposure ratio
+       #divide the occupied depth ratios by the return period
+        #sum the columns to return the integral 
+        occ_sum = sum((occupied_levee ./ occupied) ./ collect(flood_rps); dims = 1)
+        return occ_sum  
+    
+    elseif metric == "df"
+        #Take difference of two matrices
+        occ_diff = occupied_levee - occupied
         #Calculate median and 95% Uncertainty interval
         occ_med = mapslices(x -> median(x), occ_diff, dims=2)
         occ_quantiles = mapslices(x -> quantile(x, [0.025, 0.975]), occ_diff, dims=2)
         #Save results to DataFrame
         occ_df = DataFrame(return_period = collect(flood_rps), median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
         return occ_df
-
-    elseif metric == "integral"
-        #divide the occupied depth differences by the return period
-        #sum the columns to return the integral 
-        occ_sum = sum(occ_diff ./ collect(flood_rps); dims = 1)
-        return occ_sum
     end
 end
 
