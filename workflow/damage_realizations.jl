@@ -108,7 +108,7 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0, breach_null = 0.45, N = 1200, metric = "df")
+    pop_growth = 0.0, breach_null = 0.45, N = 1200, metric = "df")
 
     models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
     models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
@@ -128,9 +128,13 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
 
     if metric == "integral"
         #divide levee scenario by no levee scenario to get exposure ratio
-       #divide the occupied depth ratios by the return period
-        #sum the columns to return the integral 
-        occ_sum = sum((occupied_levee ./ occupied) ./ collect(flood_rps); dims = 1)
+        #divide the occupied depth ratios by the return period
+        
+        #Calculate as percent increase
+        occ_perc = (occupied_levee - occupied) ./ occupied
+        #sum the columns to return the integral. Essentially returns a weighted average exposure increase
+        occ_sum = sum(occ_perc ./ collect(flood_rps), dims = 1)
+        occ_sum = replace(occ_sum, NaN => 0) 
         return occ_sum  
     
     elseif metric == "df"

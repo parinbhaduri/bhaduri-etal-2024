@@ -39,10 +39,12 @@ occ_high_sum = risk_shift(Elevation, seed_range; metric = "integral")
 occ_low_sum = risk_shift(Elevation, seed_range; risk_averse = 0.7, metric = "integral")
 
 
+
 #Plot sums
 using StatsPlots
 
 Plots.boxplot([repeat(["high"],1001) repeat(["low"],1001)], [occ_high_sum' occ_low_sum'], legend = false)
+Plots.ylims!(0.5,2.5)
 
 
 
@@ -63,6 +65,13 @@ for i in eachindex(models)
     occupied[:,i] = depth_difference(models[i], flood_rps)
     occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps)
 end
+
+#Calculate as percent increase
+occ_perc = (occupied_levee - occupied) ./ occupied
+#sum the columns to return the integral. Essentially returns a weighted average exposure increase
+occ_sum = sum(occ_perc ./ collect(flood_rps), dims = 1)
+
+
 
 occ_med = mapslices(x -> median(x), occupied, dims=2)
 occ_med_levee = mapslices(x -> median(x), occupied_levee, dims=2)

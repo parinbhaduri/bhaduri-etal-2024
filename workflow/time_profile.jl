@@ -22,13 +22,13 @@ function test_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
     seed_range = seed_range
 
     @timeit tmr "model initialization" begin 
-        models = [flood_ABM(Elev; risk_averse = risk_averse, pop_growth = pop_growth, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], seed = i) for i in seed_range]
-        models_levee = [flood_ABM(Elev; risk_averse = risk_averse, flood_depth = [GEV_event(MersenneTwister(i)) for _ in 1:100], levee = levee, breach = breach, pop_growth = pop_growth, seed = i) for i in seed_range]
+        models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
+        models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
     end
     #Run models
     @timeit tmr "model runs" begin 
-        _ = ensemblerun!([models models_levee], dummystep, combine_step!, 50, agents_first = false)
-        #_ = ensemblerun!(models_levee, agent_step!, model_step!, 50, agents_first = false)
+        _ = ensemblerun!(models, dummystep, combine_step!, 50)
+        _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
     end
 
     @timeit tmr "depth difference" begin
@@ -50,7 +50,7 @@ function test_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
         occ_med = mapslices(x -> median(x), occ_diff, dims=2)
         occ_quantiles = mapslices(x -> quantile(x, [0.025, 0.975]), occ_diff, dims=2)
         #Save results to DataFrame
-        occ_df = DataFrame(return_period = [ i for i in flood_rps], median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
+        occ_df = DataFrame(return_period = collect(flood_rps), median = occ_med[:,1], LB = occ_quantiles[:,1], RB = occ_quantiles[:,2])
     end
 
     return occ_df
