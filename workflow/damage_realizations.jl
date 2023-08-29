@@ -17,7 +17,7 @@ function depth_difference(model::ABM, flood_rps; breach_null = 0.45)
         f_breach = copy(f_depth)
         prob_fail = 0
         #Subtract levee height from flood depth if levee is present
-        if model.levee != nothing
+        if model.levee > 0
             depth_levee = f_depth - GEV_return(model.levee)
             f_depth = depth_levee > 0 ? depth_levee : 0
             #Calculate flood depth if breach occurs

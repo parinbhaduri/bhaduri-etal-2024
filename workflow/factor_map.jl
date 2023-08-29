@@ -1,18 +1,19 @@
 
-#using Distributed
-#addprocs(4)
+using Distributed
+addprocs(4, exeflags="--project=$(Base.active_project())")
 
 include("damage_realizations.jl")
 import GlobalSensitivityAnalysis as GSA
 using DataStructures
 
-"""
+
 @everywhere include("damage_realizations.jl")
 @everywhere begin
     import GlobalSensitivityAnalysis as GSA
     using DataStructures
+    using SharedArrays
 end
-"""
+
 
 
 #create function to run model using samples
@@ -22,10 +23,10 @@ function flood_scan(param_values::AbstractArray{<:Number, N}) where N
     Y = zeros(numruns, 1)
 
     
-    models = [flood_ABM(;Elev = Elevation, risk_averse = param_values[i,1], N = 1200, pop_growth = 0, seed = 1897) for i in 1:numruns]
-    models_levee = [flood_ABM(;Elev = Elevation, risk_averse = param_values[i,1], levee = 1/100, breach = true, N = 1200, pop_growth = 0, seed = 1897) for i in 1:numruns]
+    models = [flood_ABM(;Elev = Elevation, risk_averse = param_values[i,1], N = 1200, pop_growth = param_values[i,3], seed = 1897) for i in 1:numruns]
+    models_levee = [flood_ABM(;Elev = Elevation, risk_averse = param_values[i,1], levee = 1/100, breach = true, N = 1200, pop_growth = param_values[i,3], seed = 1897) for i in 1:numruns]
     #Run models
-    _ = ensemblerun!([models models_levee], dummystep, combine_step!, 50; showprogress = true)
+    _ = ensemblerun!([models models_levee], dummystep, combine_step!, 50; parallel = true, showprogress = true)
 
     flood_rps = range(10,1000, step = 10)
 
@@ -46,8 +47,9 @@ end
 
 
 #define data
-data = SobolData(
-    params = OrderedDict(:risk_averse => Uniform(0,1), :breach_null => Uniform(0.3,0.5),)
+data = GSA.SobolData(
+    params = OrderedDict(:risk_averse => Uniform(0,1), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05)),
+    N = 500,
 )
 
 samples = GSA.sample(data)
@@ -56,15 +58,9 @@ samples = GSA.sample(data)
 Y = flood_scan(samples)
 
 #analyze model
-analyze(data, Y)
+GSA.analyze(data, Y)
 
 #Plot results
-
-
-
-
-
-
 
 
 

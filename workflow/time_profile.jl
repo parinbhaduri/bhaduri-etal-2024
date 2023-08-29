@@ -18,7 +18,7 @@ using BenchmarkTools, TimerOutputs
 tmr = TimerOutput()
 
 function test_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0, breach_null = 0.45)
+    pop_growth = 0.0, breach_null = 0.45, N = 1200)
     seed_range = seed_range
 
     @timeit tmr "model initialization" begin 
@@ -60,6 +60,7 @@ end
 test_shift(Elevation, seed_range)
 show(tmr)
 reset_timer!(tmr)
+
 #scalability
 for n in [1010, 1050, 1250, 1750]
     seed_range = range(1000, n, step = 1)
