@@ -1,4 +1,4 @@
-include("damage_realizations.jl")
+include("../workflow/damage_realizations.jl")
 """File used for profiling risk_shift function"""
 
 seed_range = range(1000, 1250, step = 1)
@@ -64,7 +64,11 @@ reset_timer!(tmr)
 #scalability
 for n in [1010, 1050, 1250, 1750]
     seed_range = range(1000, n, step = 1)
-    println("iterations: $(n-1000) ")
+    println("iterations: $((n-1000) * 2) ")
     @btime test_shift($Elevation, $seed_range)
 end
 
+
+##Time risk_shift
+
+@benchmark mean(risk_shift(Elevation, seed_range; pop_growth = 0.0, parallel = true, showprogress = false, metric = "integral"))

@@ -108,34 +108,44 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0.0, breach_null = 0.45, N = 1200, metric = "df")
+    pop_growth = 0.0, breach_null = 0.45, N = 1200, metric = "df", parallel = false, showprogress = false)
+
+    flood_rps = range(10,1000, step = 10)
 
     models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
     models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
     #Run models
-    _ = ensemblerun!(models, dummystep, combine_step!, 50)
-    _ = ensemblerun!(models_levee, dummystep, combine_step!, 50)
+    if parallel == true
+        progress = Agents.ProgressMeter.Progress(length(models); enabled = showprogress)
+        final_models = Agents.ProgressMeter.progress_pmap(models, models_levee; progress) do model, model_levee
+            step!.([model model_levee], dummystep, combine_step!, 50)
+            occ = depth_difference(model, flood_rps)
+            occ_lev = depth_difference(model_levee, flood_rps)
+            return occ, occ_lev
+        end
+        
+        occupied, occupied_levee = reduce.(hcat, map(x->getindex.(final_models,x), 1:2))
 
-    flood_rps = range(10,1000, step = 10)
-    #Create matrix to store 
-    occupied = zeros(length(flood_rps),length(seed_range))
-    occupied_levee = copy(occupied)
-    #Calculate depth difference for each model in category
-    for i in eachindex(models)
-        occupied[:,i] = depth_difference(models[i], flood_rps)
-        occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps; breach_null = breach_null)
+    else
+        _ = ensemblerun!([models models_levee], dummystep, combine_step!, 50, showprogress = showprogress)
+        #Create matrix to store 
+        occupied = zeros(length(flood_rps),length(seed_range))
+        occupied_levee = copy(occupied)
+        #Calculate depth difference for each model in category
+        for i in eachindex(models)
+            occupied[:,i] = depth_difference(models[i], flood_rps)
+            occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps; breach_null = breach_null)
+        end 
     end
 
+    ## Output Options
     if metric == "integral"
         #divide levee scenario by no levee scenario to get exposure ratio
-        #divide the occupied depth ratios by the return period
+        #The sum of exposures for each scenario is multiplied by the respective event probabilities
         
-        #Calculate as percent increase
-        occ_perc = (occupied_levee - occupied) ./ occupied
-        #sum the columns to return the integral. Essentially returns a weighted average exposure increase
-        occ_sum = sum(occ_perc ./ collect(flood_rps), dims = 1)
-        occ_sum = replace(occ_sum, NaN => 0) 
-        return occ_sum  
+        #Calculate Risk Shifting integral
+        RSI = sum(occupied_levee .* (1 ./ collect(flood_rps)), dims = 1) ./ sum(occupied .* (1 ./ collect(flood_rps)), dims = 1)
+        return RSI 
     
     elseif metric == "df"
         #Take difference of two matrices

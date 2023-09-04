@@ -4,16 +4,16 @@ include("../damage_realizations.jl")
 seed_range = range(1000, 2000, step = 1)
 flood_rps = range(10,1000, step = 10)
 #Low
-occ_low = risk_shift(Elevation, seed_range; breach = false, breach_null = 0.3)
+occ_low = risk_shift(Elevation, seed_range; breach = false, parallel = true, showprogress = true)
 #medium
-occ_med = risk_shift(Elevation, seed_range)
+occ_med = risk_shift(Elevation, seed_range; breach_null = 0.3, parallel = true, showprogress = true)
 #high
-occ_high = risk_shift(Elevation, seed_range; breach_null = 0.5)
+occ_high = risk_shift(Elevation, seed_range; breach_null = 0.5, parallel = true, showprogress = true)
 
 #Join two dataframes and savefig
-occ_low[!, "group"] .= "low"
-occ_med[!, "group"] .= "middle"
-occ_high[!, "group"] .= "high"
+occ_low[!, "group"] .= "no breach"
+occ_med[!, "group"] .= "stable"
+occ_high[!, "group"] .= "vulnerable"
 
 
 occ_breach = vcat(occ_low,occ_med,occ_high)
