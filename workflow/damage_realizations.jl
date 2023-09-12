@@ -123,7 +123,7 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
             occ_lev = depth_difference(model_levee, flood_rps)
             return occ, occ_lev
         end
-        
+        #Reshape results into two matrices of return period by seed range size 
         occupied, occupied_levee = reduce.(hcat, map(x->getindex.(final_models,x), 1:2))
 
     else

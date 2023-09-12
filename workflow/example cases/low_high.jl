@@ -1,9 +1,9 @@
 
-using Distributed
-addprocs(4, exeflags="--project=$(Base.active_project())")
+#For parallel
+include("../parallel_setup.jl")
 
-@everywhere include("../damage_realizations.jl")
 
+#For serial
 #include("../damage_realizations.jl")
 
 seed_range = range(1000, 2000, step = 1)
