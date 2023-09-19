@@ -17,7 +17,7 @@ function depth_difference(model::ABM, flood_rps; breach_null = 0.45)
         f_breach = copy(f_depth)
         prob_fail = 0
         #Subtract levee height from flood depth if levee is present
-        if model.levee > 0
+        if model.levee > 0.0
             depth_levee = f_depth - GEV_return(model.levee)
             f_depth = depth_levee > 0 ? depth_levee : 0
             #Calculate flood depth if breach occurs
@@ -108,19 +108,21 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0.0, breach_null = 0.45, N = 1200, metric = "df", parallel = false, showprogress = false)
+    pop_growth = 0.0, breach_null = 0.45, mem = 10, fe = 0.0, prob_move = 0.025,  N = 1200,
+     metric = "df", parallel = false, showprogress = false)
 
     flood_rps = range(10,1000, step = 10)
 
-    models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
-    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, N = N, pop_growth = pop_growth, seed = i) for i in seed_range]
+    models = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, N = N, pop_growth = pop_growth, mem = mem, fe = fe, prob_move = prob_move, seed = i) for i in seed_range]
+    models_levee = [flood_ABM(;Elev = Elev, risk_averse = risk_averse, levee = levee, breach = breach, b_n = breach_null, N = N, pop_growth = pop_growth, mem = mem,
+     fe = fe, prob_move = prob_move, seed = i) for i in seed_range]
     #Run models
     if parallel == true
         progress = Agents.ProgressMeter.Progress(length(models); enabled = showprogress)
         final_models = Agents.ProgressMeter.progress_pmap(models, models_levee; progress) do model, model_levee
             step!.([model model_levee], dummystep, combine_step!, 50)
-            occ = depth_difference(model, flood_rps)
-            occ_lev = depth_difference(model_levee, flood_rps)
+            occ = depth_difference(model, flood_rps; breach_null = breach_null)
+            occ_lev = depth_difference(model_levee, flood_rps; breach_null = breach_null)
             return occ, occ_lev
         end
         #Reshape results into two matrices of return period by seed range size 
@@ -133,7 +135,7 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
         occupied_levee = copy(occupied)
         #Calculate depth difference for each model in category
         for i in eachindex(models)
-            occupied[:,i] = depth_difference(models[i], flood_rps)
+            occupied[:,i] = depth_difference(models[i], flood_rps; breach_null = breach_null)
             occupied_levee[:,i] = depth_difference(models_levee[i], flood_rps; breach_null = breach_null)
         end 
     end
@@ -144,7 +146,7 @@ function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach =
         #The sum of exposures for each scenario is multiplied by the respective event probabilities
         
         #Calculate Risk Shifting integral
-        RSI = sum(occupied_levee .* (1 ./ collect(flood_rps)), dims = 1) ./ sum(occupied .* (1 ./ collect(flood_rps)), dims = 1)
+        RSI = log.(sum(occupied_levee .* (1 ./ collect(flood_rps)), dims = 1) ./ sum(occupied .* (1 ./ collect(flood_rps)), dims = 1))
         return RSI 
     
     elseif metric == "df"

@@ -17,13 +17,13 @@ function flood_scan(param_values::AbstractArray{<:Number, N}) where N
 
     progress = Agents.ProgressMeter.Progress(numruns; enabled = true)
     Y[1,1] = mean(risk_shift(Elevation, seed_range; risk_averse = param_values[1,1], levee = param_values[1,4], breach = true, 
-    pop_growth = param_values[1,3], breach_null = param_values[1,2], N = 1200, parallel = true, showprogress = false, metric = "integral"))
+    pop_growth = param_values[1,3], breach_null = param_values[1,2], N = 1200, mem = param_values[1,5], fe = param_values[1,6], prob_move = param_values[1,7], parallel = true, showprogress = false, metric = "integral"))
 
     Agents.ProgressMeter.next!(progress)
 
     Agents.ProgressMeter.progress_map(2:numruns; progress) do i
-        Y[i,1] = mean(risk_shift(Elevation, seed_range; risk_averse = param_values[i,1], levee = param_values[1,4], breach = true, 
-    pop_growth = param_values[i,3], breach_null = param_values[i,2], N = 1200, parallel = true, showprogress = false, metric = "integral"))
+        Y[i,1] = mean(risk_shift(Elevation, seed_range; risk_averse = param_values[i,1], levee = param_values[i,4], breach = true, 
+    pop_growth = param_values[i,3], breach_null = param_values[i,2], N = 1200, mem = param_values[i,5], fe = param_values[i,6], prob_move = param_values[i,7], parallel = true, showprogress = false, metric = "integral"))
     end
 
     return Y
@@ -33,7 +33,7 @@ end
 #define data
 data = GSA.SobolData(
     params = OrderedDict(:risk_averse => Uniform(0,1), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05), :levee => Categorical([(1/3) for _ in 1:3]),
-    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.3,0.5), :base_move => Uniform(0.001,0.04),),
+    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.01,0.05), :base_move => Uniform(0.001,0.05),),
 
     
 )
