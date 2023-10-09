@@ -4,7 +4,7 @@ include("../../flood-risk-abm/src/base_model.jl")
 #Define plot attributes
 include("../../flood-risk-abm/src/visual_attrs.jl")
 
-using LinearAlgebra
+using LinearAlgebra, CSV
 
 function depth_difference(model::ABM, flood_rps; breach_null = 0.45)
     occupied_feet = []

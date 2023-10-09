@@ -1,6 +1,9 @@
 #Compares risk shifting properties among variations in levee breach curve shape
 include("../damage_realizations.jl")
 
+#For parallel
+include("../parallel_setup.jl")
+
 seed_range = range(1000, 2000, step = 1)
 flood_rps = range(10,1000, step = 10)
 #Low
@@ -25,36 +28,38 @@ CSV.write("workflow/dataframes/occ_breach.csv", occ_breach)
 
 threshold = zeros(length(flood_rps))
 #Plot results
-breach_low = Plots.plot(flood_rps, occ_low.median, linecolor = "blue", lw = 2.5, xscale = :log10,
+breach_low = Plots.plot(flood_rps, occ_low.median, linecolor = colorant"#005F73", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10),  label = false)
-Plots.plot!(flood_rps, occ_low.LB, fillrange=occ_low.RB, linecolor = "blue", fillcolor = "blue",
+Plots.plot!(flood_rps, occ_low.LB, fillrange=occ_low.RB, linecolor = colorant"#005F73", fillcolor = colorant"#005F73",
  fillalpha=0.35, alpha =0.35, label=false)
 Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
-Plots.title!("Risk shifting: high RA, no breaching")
+Plots.title!("No Breaching")
 #Plots.xlabel!("Return Period")
 #Plots.ylabel!("Difference in Occupied-Exposure")
 
-breach_med = Plots.plot(flood_rps, occ_med.median, linecolor = "orange", lw = 2.5, xscale = :log10,
+breach_med = Plots.plot(flood_rps, occ_med.median, linecolor = colorant"#CA6702", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10), label = false)
-Plots.plot!(flood_rps, occ_med.LB, fillrange=occ_med.RB, linecolor = "orange", fillcolor = "orange",
+Plots.plot!(flood_rps, occ_med.LB, fillrange=occ_med.RB, linecolor = colorant"#CA6702", fillcolor = colorant"#CA6702",
  fillalpha=0.35, alpha =0.35, label=false)
  Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 #Plots.xlabel!("Return Period")
-Plots.ylabel!("Difference in Occupied-Exposure", fontsize = 45)
+#Plots.ylabel!("Difference in Occupied-Exposure", fontsize = 45)
+Plots.title!("Stable (Low Likelihood of Breaching)")
 
-breach_high = Plots.plot(flood_rps, occ_high.median, linecolor = "green", lw = 2.5, xscale = :log10,
+breach_high = Plots.plot(flood_rps, occ_high.median, linecolor = colorant"#9B2226", lw = 2.5, xscale = :log10,
  xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10), label = false)
-Plots.plot!(flood_rps, occ_high.LB, fillrange=occ_high.RB, linecolor = "green", fillcolor = "green",
+Plots.plot!(flood_rps, occ_high.LB, fillrange=occ_high.RB, linecolor = colorant"#9B2226", fillcolor = colorant"#9B2226",
  fillalpha=0.35, alpha =0.35, label=false)
  Plots.plot!(flood_rps, threshold, line = :dash, linecolor = "black", lw = 2, label=false)
 Plots.xlabel!("Return Period (Years)")
 #Plots.ylabel!("Difference in Occupied-Exposure")
+Plots.title!("Vulnerable (High Likelihood of Breaching)")
 
 
 #Combined Plot
 using Plots.PlotMeasures
-breach_shape = Plots.plot(breach_low, breach_med, breach_high, layout = (3,1), left_margin = 10mm,  dpi = 300, size = (700,800))
+breach_shape = Plots.plot(breach_low, breach_med, breach_high, layout = (1,3), top_margin = 10mm,  dpi = 300, size = (1500,250))
 
-savefig(breach_shape, "figures/breach_shape.svg")
+savefig(breach_shape, "figures/breach_shape_hor.svg")
 
 #savefig(breach_med, "figures/breach_med.svg")
