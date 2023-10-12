@@ -35,7 +35,7 @@ end
 data = GSA.SobolData(
     params = OrderedDict(:risk_averse => Uniform(0,1), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05), :levee => Categorical([(1/3) for _ in 1:3]),
     :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0,0.08), :base_move => Uniform(0.01,0.05), :breach => Binomial(1, 0.5),),
-
+    N = 1000,
     
 )
 
@@ -47,6 +47,7 @@ samples[:,5] .+= 3.0
 
 #run model
 Y = flood_scan(samples)
+
 ## Save results
 #Create Dataframe to store values
 
@@ -54,20 +55,12 @@ params = data.params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write
-#analyze model
-GSA.analyze(data, Y)
+CSV.write("workflow/SA Results/factor_map_table.csv", factor_samples)
 
-## Plot results
-#Create Dataframe to store values
-params = data.params.keys
-push!(params, :RSI)
-
-factor_samples = DataFrame(hcat(samples,Y), params)
-
-factor_samples[!, :state] = ifelse.(factor_samples.RSI .<=1, "improve", "worsen")
+#analyze
+sobol_results = GSA.analyze(data, Y)
+#save dictionary
+CSV.write("workflow/SA Results/sobol_results.csv", sobol_results)
 
 
-Plots.scatter(factor_samples.risk_averse, factor_samples.breach_null, group = factor_samples.state)
-Plots.xlabel!("risk averse")
-Plots.ylabel!("Breach null")
+
