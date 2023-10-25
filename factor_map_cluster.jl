@@ -1,13 +1,25 @@
 
 #File for running sensitivity analysis on Cluster 
+using Distributed
 
-include("damage_realizations.jl")
-import GlobalSensitivityAnalysis as GSA
-using DataStructures
-using CSV
+num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
+addprocs(num_cores)
+
+# instantiate and precompile environment
+@everywhere begin
+  using Pkg;Pkg.activate(@__DIR__); 
+  Pkg.instantiate(); Pkg.precompile()
+end
 
 #For parallel
-include("parallel_setup.jl")
+@everywhere include(joinpath(@__DIR__,"workflow/damage_realizations.jl"))
+@everywhere begin
+    import GlobalSensitivityAnalysis as GSA
+    using DataStructures
+    using SharedArrays
+    using CSV
+end
+
 
 #Set seed range
 seed_range = range(1000, 1999, step = 1)
@@ -50,7 +62,6 @@ samples[:,5] .+= 3.0
 #run model
 Y = flood_scan(samples)
 
-
 ## Save results
 #Create Dataframe to store values
 
@@ -58,4 +69,10 @@ params = data.params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write("workflow/SA Results/factor_map_table_cluster.csv", factor_samples)
+CSV.write(joinpath(@__DIR__, "workflow/SA Results/factor_map_table_cluster.csv"), factor_samples)
+
+#Analyze model results
+#sobol_results = GSA.analyze(data, Y)
+
+
+
