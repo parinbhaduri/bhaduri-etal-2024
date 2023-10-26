@@ -2,7 +2,7 @@
 
 include("../../flood-risk-abm/src/base_model.jl")
 #Define plot attributes
-include("../../flood-risk-abm/src/visual_attrs.jl")
+#include("../../flood-risk-abm/src/visual_attrs.jl")
 
 using LinearAlgebra, CSV
 

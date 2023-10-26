@@ -7,6 +7,7 @@ addprocs(12, exeflags="--project=$(Base.active_project())")
     using DataStructures
     using SharedArrays
     using CSV
+    using FileIO
 end
 
 #config file for paralellization properties. File read in for workflow scripts
