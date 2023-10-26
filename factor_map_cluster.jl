@@ -71,13 +71,13 @@ params = data.params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write(joinpath(@__DIR__, "workflow/SA Results/factor_map_table_cluster.csv"), factor_samples)
+CSV.write(joinpath(@__DIR__, "workflow/SA Results/factor_map_table_100.csv"), factor_samples)
 
 #Analyze model results
 #analyze
 sobol_results = GSA.analyze(data, Y)
 #save dictionary
-save(joinpath(@__DIR__, "workflow/SA Results/sobol_results.jld2"), sobol_results)
+save(joinpath(@__DIR__, "workflow/SA Results/sobol_results_100.jld2"), sobol_results)
 #CSV.write("workflow/SA Results/sobol_results.csv", sobol_results)
 
 
