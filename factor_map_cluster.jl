@@ -26,7 +26,7 @@ end
 seed_range = range(1000, 1999, step = 1)
 
 #Set return period for Levee height
-l_H = 1/100
+l_H = 1/50
 
 #create function to run model using samples
 function flood_scan(param_values::AbstractArray{<:Number, N}, levee_rp::Float64) where N
@@ -71,13 +71,13 @@ params = data.params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write(joinpath(@__DIR__, "workflow/SA_Results/factor_map_table_100.csv"), factor_samples)
+CSV.write(joinpath(@__DIR__, "workflow/SA_Results/factor_map_table_50.csv"), factor_samples)
 
 #Analyze model results
 #analyze
 sobol_results = GSA.analyze(data, Y)
 #save dictionary
-save(joinpath(@__DIR__, "workflow/SA_Results/sobol_results_100.jld2"), sobol_results)
+save(joinpath(@__DIR__, "workflow/SA_Results/sobol_results_50.jld2"), sobol_results)
 #CSV.write("workflow/SA Results/sobol_results.csv", sobol_results)
 
 
