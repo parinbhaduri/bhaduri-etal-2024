@@ -29,7 +29,7 @@ Plots.plot(x, occ_lev - occ, xscale = :log10, labels = false)
 
 
 #Calculate RSI
-sum(occ_lev .* (1 ./ collect(flood_rps))) / sum(occ .* (1 ./ collect(flood_rps)))
+log(sum(occ_lev .* (1 ./ collect(flood_rps))) / sum(occ .* (1 ./ collect(flood_rps))))
 
 
 
