@@ -40,8 +40,8 @@ savefig(breach_averse, "figures/breach_averse.svg")
 
 
 ## Calculate integral of risk shifting curves
-occ_high_sum = risk_shift(Elevation, seed_range; metric = "integral")
-occ_low_sum = risk_shift(Elevation, seed_range; risk_averse = 0.7, metric = "integral")
+occ_high_sum = risk_shift(Elevation, seed_range; metric = "integral", parallel = true, showprogress = true)
+occ_low_sum = risk_shift(Elevation, seed_range; breach_null = 0.3, risk_averse = 0.7, metric = "integral", parallel = true, showprogress = true)
 
 
 

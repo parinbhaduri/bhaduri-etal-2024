@@ -20,10 +20,12 @@ Plots.ylabel!("Breach null")
 ##Plot analysis results
 using Plots
 
-sobol_results = load(joinpath(@__DIR__,"SA_Results/sobol_results_100.jld2"))
-bar(names(sa_df)[1:end-1], sobol_results["firstorder"])
-#bar(names(sa_df)[1:end-1], sobol_results["secondorder"])
-bar(names(sa_df)[1:end-1], sobol_results["totalorder"])
+sobol_results = load(joinpath(@__DIR__,"SA_Results/sobol_results_50.jld2"))
+sa_plot = bar(names(sa_df)[1:end-1], sobol_results["firstorder"], fillcolor = colorant"#005F73", label = false)
+Plots.ylabel!("First-Order Sensitivity Index")
+#bar!(names(sa_df)[1:end-1], sobol_results["totalorder"])
+
+savefig(sa_plot, joinpath(@__DIR__,"SA_Results/figures/first_order_50.svg"))
 
 #For second order interactions
 heatmap(sobol_results["secondorder_conf"], xticks=(1:6, names(sa_df)[1:end-1]), yticks=(1:6, names(sa_df)[1:end-1]), c = cgrad(:vik, rev = true))
