@@ -1,14 +1,3 @@
-include("../damage_realizations.jl")
-
-seed_range = range(1000, 2000, step = 1)
-flood_rps = range(10,1000, step = 10)
-#Model with population growth
-occ_pop_05 = risk_shift(Elevation, seed_range; pop_growth = 0.005)
-occ_pop_1 = risk_shift(Elevation, seed_range; pop_growth = 0.01)
-occ_pop_2 = risk_shift(Elevation, seed_range; pop_growth = 0.02)
-occ_pop_5 = risk_shift(Elevation, seed_range; pop_growth = 0.05)
-
-
 
 #Join two dataframes and savefig
 occ_pop_05[!, "group"] .= 0.5

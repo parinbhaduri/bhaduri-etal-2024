@@ -1,5 +1,4 @@
 
-include("damage_realizations.jl")
 import GlobalSensitivityAnalysis as GSA
 using DataStructures
 using DataFrames, CSV

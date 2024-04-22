@@ -1,7 +1,11 @@
-using Distributed
-addprocs(4, exeflags="--project=$(Base.active_project())")
+#activate project environment
+using Pkg
+Pkg.activate(dirname(@__DIR__))
+Pkg.instantiate()
 
-@everywhere include("../workflow/damage_realizations.jl")
+
+#Set up parallell processors; Include necessary functions from other scripts
+include(joinpath(dirname(@__DIR__), "workflow/toy_model/src/parallel_setup.jl"))
 
 ## Look at individual cumulative exposure curves
 seed_range = range(1000, 2000, step = 1)

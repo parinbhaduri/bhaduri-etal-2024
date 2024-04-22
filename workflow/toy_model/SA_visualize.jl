@@ -25,7 +25,7 @@ sa_plot = bar(names(sa_df)[1:end-1], sobol_results["firstorder"], fillcolor = co
 Plots.ylabel!("First-Order Sensitivity Index")
 #bar!(names(sa_df)[1:end-1], sobol_results["totalorder"])
 
-savefig(sa_plot, joinpath(@__DIR__,"SA_Results/figures/first_order_50.svg"))
+savefig(sa_plot, joinpath(@__DIR__,"output/SA_Results/figures/first_order_50.svg"))
 
 #For second order interactions
 heatmap(sobol_results["secondorder_conf"], xticks=(1:6, names(sa_df)[1:end-1]), yticks=(1:6, names(sa_df)[1:end-1]), c = cgrad(:vik, rev = true))
