@@ -1,18 +1,80 @@
+#activate project environment
+using Pkg
+Pkg.activate(pwd())
+Pkg.instantiate()
 
-#Join two dataframes and savefig
-occ_pop_05[!, "group"] .= 0.5
-occ_pop_1[!, "group"] .= 1.0
-occ_pop_2[!, "group"] .= 2.0
-occ_pop_5[!, "group"] .= 5.0
+using CSV, DataFrames
+using CairoMakie
+using FileIO
 
-occ_pop = vcat(occ_pop_05,occ_pop_1,occ_pop_2,occ_pop_5)
+#Read in Data
+occ_base = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/breach_base.csv")))
+occ_pop_2 = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/pop_growth_2.csv")))
+occ_pop_5 = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/pop_growth_5.csv")))
 
-#Save/open dataframe
-CSV.write("workflow/dataframes/occ_pop.csv", occ_pop)
-#occ_pop = DataFrame(CSV.File("workflow/dataframes/occ_pop.csv"))
-
-threshold = zeros(length(flood_rps))
+ret_per = range(10, 1000, length=100)
+threshold = zeros(length(ret_per))
 #Plot results
+
+fig = Figure()
+
+ax1 = Axis(fig[1, 1], ylabel = "Difference in Occupied Exposure", xlabel = "Return Period (years)", xscale = log10,
+ xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false)
+
+hidespines!(ax1,:t, :r)
+
+palette = ColorSchemes.tol_bright
+
+#Baseline
+CairoMakie.lines!(ax1, ret_per, occ_base.median, color = palette[1], linewidth = 2.5, label = "No Growth")
+#, label = false)
+CairoMakie.band!(ax1, ret_per, occ_base.LB, occ_base.RB, color = (palette[1], 0.35))
+CairoMakie.lines!(ax1, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
+
+#2% Growth
+CairoMakie.lines!(ax1, ret_per, occ_pop_2.median, color = palette[2], linewidth = 2.5, label = "2% Growth")
+#, label = false)
+CairoMakie.band!(ax1, ret_per, occ_pop_2.LB, occ_pop_2.RB, color = (palette[2], 0.35))
+CairoMakie.lines!(ax1, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
+
+#5% Growth
+CairoMakie.lines!(ax1, ret_per, occ_pop_5.median, color = palette[3], linewidth = 3, label = "5% Growth")
+#, label = false)
+CairoMakie.band!(ax1, ret_per, occ_pop_5.LB, occ_pop_5.RB, color = (palette[3], 0.35))
+CairoMakie.lines!(ax1, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
+
+fig[1, 2] = Legend(fig, ax1, framevisible = false)
+fig
+
+CairoMakie.save(joinpath(pwd(),"figures/pop_growth.png"), fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 breach_pop = Plots.plot(occ_pop[:, "return_period"], occ_pop.median, group = occ_pop.group, linecolor = ["blue" "orange" "green" "purple"],
 lw = 2.5, xscale = :log10, xticks = ([10,100,1000], string.([10,100,1000])), ytickfont = font(10), xtickfont = font(10))
 Plots.plot!(occ_pop[:, "return_period"], occ_pop.LB, fillrange= occ_pop.RB, group = occ_pop.group,

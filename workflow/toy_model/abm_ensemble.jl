@@ -43,7 +43,7 @@ params_levee = Dict(
 ##Evolve models over different parameter combinations
 adf_levee, mdf_levee = paramscan(params_levee, flood_ABM; parallel = true, showprogress = true, adata, mdata, agent_step! = dummystep, model_step! = combine_step!, n = 50)
 CSV.write(joinpath(@__DIR__,"dataframes/adf_levee.csv"), adf_levee)
-CSV.write(joinpath(@__DIR__,"dataframes/mdf_levee.csv"), mdef_levee)
+CSV.write(joinpath(@__DIR__,"dataframes/mdf_levee.csv"), mdf_levee)
 
 #remove parallel processors
 rmprocs(workers())

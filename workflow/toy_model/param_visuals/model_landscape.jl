@@ -3,16 +3,29 @@ using Pkg
 Pkg.activate(pwd())
 Pkg.instantiate()
 
-using GLMakie 
-
+using CairoMakie
+using ColorSchemes
+#using InteractiveDynamics
 #import breach functions from toy model
 include(joinpath(dirname(@__DIR__), "src/toy_ABM_functions.jl"))
 
 test_abm = flood_ABM(;)
+length_x, length_y = size(test_abm.Elevation)
+
+flood_fig = Figure()
+
+
+ax1 = Axis(flood_fig[1,1], aspect = 1)
+hidedecorations!(ax1)
+colsize!(flood_fig.layout, 1, Aspect(1,1.0))
+
+
+#ax2 = Axis(model_fig[1, 2], aspect = 1)
+#hidedecorations!(ax2)
+#colsize!(model_fig[1,2].layout, 2, Fixed(350))
+
+
 ##Create heatmap for Flood level GEV_return
-figure = (; resolution=(600, 400), dpi = 300, font="CMU Serif")
-#Import Elevation
-include("../data/Elevation.jl")
 function flood_rps(model::ABM)
     #Calculate flood returns
     flood_10 = GEV_return(1/10)
@@ -20,7 +33,7 @@ function flood_rps(model::ABM)
     flood_500 = GEV_return(1/500)
     flood_1000 = GEV_return(1/1000)
     #Create matrix 
-    flood_return = zeros(30,30)
+    flood_return = zeros(size(model.Elevation))
     #return_labels = ["$i-yr" for i in [10,100,500,1000]]
     flood_return[model.Elevation .<= flood_10] .= 1
     flood_return[model.Elevation .> flood_10 .&& model.Elevation .<= flood_100 ] .= 2
@@ -31,15 +44,21 @@ end
 
 flood_mat = flood_rps(test_abm)
 
-figure_flo_ret = Plots.heatmap(1:30,1:30, transpose(flood_mat), levels = 4,
-    seriescolor=reverse(palette(:Blues_4)), figure = figure)
+fm = CairoMakie.heatmap!(ax1, 1:length_x, 1:length_y, flood_mat, colormap = reverse(cgrad(:Blues_4, 4, categorical = true)))
+f_col = Colorbar(flood_fig[1, 2], fm, ticks = [10,100,500,1000])#, vertical = false)
+#f_col.tellheight = true
 
-savefig(figure_flo_ret, joinpath(@__DIR__,"figures/fig_elev.png"))
-
+flood_fig
+CairoMakie.save(joinpath(pwd(),"figures/flood_landcape.png"), flood_fig)
 
 
 
 ###Create heatmap for Utility
+util_fig = Figure()
+ax2 = Axis(util_fig[1,1])
+hidedecorations!(ax2)
+colsize!(util_fig.layout, 1, Aspect(1,1.0))
+
 function utility_map(model::ABM)
     #Create utility matrix
     util_mat = zeros(size(model.Elevation))
@@ -57,8 +76,21 @@ end
 
 util_mat = utility_map(test_abm)
 
-figure = (; resolution=(600, 400), dpi = 300, font="CMU Serif")
-figure_utility = Plots.heatmap(1:size(util_mat)[1],1:size(util_mat)[2], transpose(util_mat),
-    seriescolor=reverse(cgrad([colorant"#005F73", colorant"#0A9396", colorant"#E9D8A6", colorant"#EE9B00",colorant"#BB3E03"], [0.6,0.8])), colorbar_tickfontsize = 20, Figure = figure)
+um = CairoMakie.heatmap!(ax2, 1:length_x, 1:length_y, util_mat, colormap = cgrad(:bam, [0.3,0.5]))
+Colorbar(util_fig[1, 2], um)
 
-savefig(figure_utility, "src/Parameter_visual/fig_utility.png")
+util_fig
+
+CairoMakie.save(joinpath(pwd(),"figures/util_landcape.png"), util_fig)
+
+""" 
+#savefig(figure_utility, "src/Parameter_visual/fig_utility.png")
+
+include(joinpath(dirname(@__DIR__),"src/visual_attrs.jl"))
+
+#step through ABM
+step!(test_abm, dummystep, combine_step!, 5)
+abmplot!(ax1,test_abm; plotkwargs...)
+
+model_fig
+"""
