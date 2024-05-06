@@ -17,7 +17,7 @@ flood_fig = Figure()
 
 ax1 = Axis(flood_fig[1,1], aspect = 1)
 hidedecorations!(ax1)
-colsize!(flood_fig.layout, 1, Aspect(1,1.0))
+#colsize!(flood_fig.layout, 1, Aspect(1,1.0))
 
 
 #ax2 = Axis(model_fig[1, 2], aspect = 1)
@@ -44,20 +44,22 @@ end
 
 flood_mat = flood_rps(test_abm)
 
-fm = CairoMakie.heatmap!(ax1, 1:length_x, 1:length_y, flood_mat, colormap = reverse(cgrad(:Blues_4, 4, categorical = true)))
-f_col = Colorbar(flood_fig[1, 2], fm, ticks = [10,100,500,1000])#, vertical = false)
+fm = CairoMakie.heatmap!(ax1, 1:length_x, 1:length_y, flood_mat, colormap = reverse(cgrad(:Blues_4, 4, categorical = true)), tellheight = true)
+fm.colorrange = (0.5,4.5)
+f_col = Colorbar(flood_fig[1, 2], fm, ticks = ([1,2,3,4], ["10","100","500", "1000"]))#, vertical = false)
+#f_col.ticks = 1:4
 #f_col.tellheight = true
 
 flood_fig
-CairoMakie.save(joinpath(pwd(),"figures/flood_landcape.png"), flood_fig)
+#CairoMakie.save(joinpath(pwd(),"figures/flood_landcape.png"), flood_fig)
 
 
 
 ###Create heatmap for Utility
-util_fig = Figure()
-ax2 = Axis(util_fig[1,1])
+#util_fig = Figure()
+ax2 = Axis(flood_fig[1,3], aspect = 1)
 hidedecorations!(ax2)
-colsize!(util_fig.layout, 1, Aspect(1,1.0))
+#colsize!(flood_fig.layout, 1, Aspect(1,1.0))
 
 function utility_map(model::ABM)
     #Create utility matrix
@@ -76,10 +78,12 @@ end
 
 util_mat = utility_map(test_abm)
 
-um = CairoMakie.heatmap!(ax2, 1:length_x, 1:length_y, util_mat, colormap = cgrad(:bam, [0.3,0.5]))
-Colorbar(util_fig[1, 2], um)
+um = CairoMakie.heatmap!(ax2, 1:length_x, 1:length_y, util_mat, colormap = cgrad(:bam, [0.3,0.5]), tellheight = true)
+Colorbar(flood_fig[1, 4], um)
 
-util_fig
+rowsize!(flood_fig.layout, 1, Aspect(1, 1))
+flood_fig
+
 
 CairoMakie.save(joinpath(pwd(),"figures/util_landcape.png"), util_fig)
 
