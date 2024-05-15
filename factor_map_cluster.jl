@@ -12,7 +12,7 @@ addprocs(num_cores)
 end
 
 #For parallel
-@everywhere include(joinpath(@__DIR__,"workflow/damage_realizations.jl"))
+@everywhere include(joinpath(@__DIR__,"workflow/toy_model/src/damage_realizations.jl"))
 @everywhere begin
     import GlobalSensitivityAnalysis as GSA
     using DataStructures
@@ -71,7 +71,7 @@ params = data.params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write(joinpath(@__DIR__, "workflow/SA_Results/factor_map_table_100.csv"), factor_samples)
+CSV.write(joinpath(@__DIR__, "workflow/toy_model/output/SA_Results/factor_map_table_100.csv"), factor_samples)
 
 #Analyze model results
 #analyze
