@@ -1,11 +1,12 @@
 
 import GlobalSensitivityAnalysis as GSA
 using DataStructures
+using Distributions
 using DataFrames, CSV
 
 ## Calculate sobol indices from results in factor_map_cluster.jl
 #Set return period for Levee height
-l_H = 1/50
+l_H = 1/100
 
 #define data
 data = GSA.SobolData(
@@ -16,13 +17,13 @@ data = GSA.SobolData(
 )
 
 #load outcomes from csv file 
-sa_df = DataFrame(CSV.File("workflow/SA_Results/factor_map_table_50.csv"))
+sa_df = DataFrame(CSV.File("workflow/SA_Results/factor_map_table_100.csv"))
 
 #analyze
 sobol_results = GSA.analyze(data, sa_df.RSI)
 #save dictionary
 using FileIO
-save("workflow/SA_Results/sobol_results_50.jld2", sobol_results)
+save("workflow/SA_Results/sobol_results_100.jld2", sobol_results)
 
 
 

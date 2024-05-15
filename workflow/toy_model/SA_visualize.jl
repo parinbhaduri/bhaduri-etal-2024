@@ -11,7 +11,7 @@ sa_df = DataFrame(CSV.File(joinpath(@__DIR__,"output/SA_Results/factor_map_table
 
 ##Plot analysis results
 sobol_results = load(joinpath(@__DIR__,"output/SA_Results/sobol_results_50.jld2"))
-sa_plot = bar(names(sa_df)[1:end-1], sobol_results["firstorder"], fillcolor = colorant"#005F73", label = false)
+sa_plot = bar(names(sa_df)[1:end-1], sobol_results["firstorder"], fillcolor = colorant"#005F73", label = false, dpi = 300)
 Plots.ylabel!("First-Order Sensitivity Index")
 #bar!(names(sa_df)[1:end-1], sobol_results["totalorder"])
 
