@@ -12,6 +12,7 @@ addprocs(num_cores)
 end
 
 #For parallel
+@everywhere include(joinpath(@__DIR__,"workflow/toy_model/src/toy_ABM_functions.jl"))
 @everywhere include(joinpath(@__DIR__,"workflow/toy_model/src/damage_realizations.jl"))
 @everywhere begin
     import GlobalSensitivityAnalysis as GSA
