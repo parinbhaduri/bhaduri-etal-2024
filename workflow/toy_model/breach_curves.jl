@@ -1,12 +1,12 @@
 #activate project environment
 using Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 using Plots
 #Levee Breach Probability surface
 #import breach functions from toy model
-include(joinpath(dirname(@__DIR__), "src/toy_ABM_functions.jl"))
+include(joinpath(@__DIR__, "src/toy_ABM_functions.jl"))
 
 water_level = [n for n in range(0,15,step=0.1)]
 
@@ -22,4 +22,5 @@ Plots.ylabel!("Levee Failure Probability")
 
 #cgrad([colorant"#0A9396", colorant"#E9D8A6", colorant"#BB3E03"], [0.3,0.4])
 
-savefig(breach_curve, joinpath(@__DIR__,"figures/breach_func.png"))
+savefig(breach_curve, joinpath(pwd(),"figures/breach_func.png"))
+

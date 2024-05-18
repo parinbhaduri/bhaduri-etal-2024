@@ -1,6 +1,6 @@
 ### Check to see sensitivity of flood coefficient value on model outcomes ###
 import Pkg
-Pkg.activate(dirname(@__DIR__))
+Pkg.activate(".")
 Pkg.instantiate()
 
 using CHANCE_C

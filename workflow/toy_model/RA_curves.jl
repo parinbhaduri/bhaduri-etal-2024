@@ -1,6 +1,6 @@
 #activate project environment
 using Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 ##Graph Agent action probability
@@ -33,10 +33,10 @@ xticks = ([0,1,3,5,7,10], string.([0,1,3,5,7,10])), legend = :outerbottom, legen
 Plots.xlabel!("Flood Events per Decade")
 Plots.ylabel!("Movement Probability")
 
-savefig(log_fig, joinpath(@__DIR__,"figures/log_func.png"))
+savefig(log_fig, joinpath(pwd(),"figures/log_func.png"))
 
 log_scale_fig = Plots.plot(x.*10,[y1 y1_scale y2_scale y3_scale], label = ["fixed effect = 0" " fixed effect = 0.03" "fixed effecte = 0.05" "fixed effect = 0.07"], lw = 3,
 xticks = ([0,1,3,5,7,10], string.([0,1,3,5,7,10])), legend = :outerbottom, legendcolumns = 2, legend_foreground_color = :transparent, dpi = 300)
 Plots.xlabel!("Flood Events per Decade")
 Plots.ylabel!("Movement Probability")
-savefig(log_scale_fig, joinpath(@__DIR__,"figures/log_func_scale.png"))
+savefig(log_scale_fig, joinpath(pwd(),"figures/log_func_scale.png"))

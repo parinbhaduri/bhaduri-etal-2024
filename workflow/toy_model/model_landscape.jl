@@ -1,6 +1,6 @@
 #activate project environment and import packages
 using Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 using CairoMakie
