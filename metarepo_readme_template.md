@@ -88,14 +88,14 @@ This section should consist of a walkthrough of how to reproduce your experiment
 | --- | --- | --- |
 | Figure 2 | `model_landscape.jl` | `julia generate_hindcast-jl` |
 | Figure 3 | `plot_abm_ensemble.jl` | `julia generate_hindcast-jl` |
-| Figure 4 | `breach_curves.jl` | `julia generate_hindcast-jl` |
-| Figure 5 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure 6 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure 7 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure 8 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure A1 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure A2 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
-| Figure A3 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
+| Figure 4 | `plot_breach_shape.jl` | `julia generate_hindcast-jl` |
+| Figure 5 | `SA_visualize.jl` | `julia generate_hindcast-jl` |
+| Figure 6 | `plot_pop_growth` | `julia generate_hindcast-jl` |
+| Figure 7 | `tbd` | `tbd` |
+| Figure 8 | `tbd` | `tbd` |
+| Figure A1 | `RA_curves.jl` | `julia generate_hindcast-jl` |
+| Figure A2 | `RA_curves.jl` | `julia generate_hindcast-jl` |
+| Figure A3 | `breach_curves.jl` | `julia generate_hindcast-jl` |
 | Figure A4 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
 | Figure A5 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
 
