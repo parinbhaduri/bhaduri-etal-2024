@@ -1,0 +1,58 @@
+###Stores functions needed to calculate damage estimates
+function event_damage(model::ABM, ddf::DataFrame, surge_char::Dict{Float64}; scen::String)
+    #Grab Block Group id, population, and cumulative housing value from the Block Group agents
+    pop_df = DataFrame(stack([[a.id, a.population, a.population * a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "bg_pop", "bg_val"])
+    #join pop data with the ABM dataframe
+    base_df = leftjoin(model.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
+    #Join ABM dataframe with depth-damage ensemble
+    new_df = innerjoin(base_df, ddf, on= :GEOID => :bg_id)
+
+    ## calculate losses across event sizes
+    #Calculate ratio between BG flood loss and BG housing value
+    #for each intervention scenario and event
+    test_dam = select(new_df, r"naccs") ./ new_df.bg_val 
+    #Change inf values (price or pop is 0) to 0
+    test_dam .= ifelse.(test_dam .== Inf, 0.0, test_dam)
+
+    if scen == "levee"
+        p_breach = sort(collect(values(surge_char)))
+    else
+        p_breach = ones(length(keys(surge_char)))
+    end
+    
+    #Calculate weighted average of losses for each event. Sum over block groups  
+    event_damages = sum(Matrix(select(test_dam, r"_Base_")) .* p_breach' .+ Matrix(select(test_dam, r"_Levee_")) .* (1 .-p_breach'), dims = 1)
+    return vec(event_damages)
+end
+
+
+
+function risk_damage(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
+
+    #Create model ensembles based on input parameters
+    models = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
+
+    models_levee = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=true,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
+
+    #Evolve models. Calculate damages
+    progress = Agents.ProgressMeter.Progress(length(models); enabled = showprogress)
+    all_data = Agents.ProgressMeter.progress_pmap(models, models_levee; progress) do model, model_levee
+        step!.([model model_levee], dummystep, CHANCE_C.model_step!, 50)
+        occ = event_damage(model, ddf, breach_dict; scen = "base")
+        occ_lev = event_damage(model_levee, ddf, breach_dict; scen = "levee")
+        return occ, occ_lev
+    end
+
+    occupied = DataFrame(zeros(length(keys(breach_dict)),length(seed_range)), string.(collect(seed_range)))
+    occupied_levee = copy(occupied)
+
+    #Add damage data to dataframes by seed value  
+    for (seed, data) in zip(collect(seed_range),all_data)
+        occupied[!, string(seed)] = data[1]
+        occupied_levee[!, string(seed)] = data[2]
+    end
+    return occupied, occupied_levee
+end

@@ -1,6 +1,6 @@
 #activate project environment
 using Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 
@@ -8,7 +8,7 @@ Pkg.instantiate()
 include(joinpath(@__DIR__, "src/parallel_setup.jl"))
 
 
-seed_range = range(1000, 2000, step = 1)
+seed_range = range(1000, 1999, step = 1)
 flood_rps = range(10,1000, step = 10)
 
 ##Run ABM breaching scenarios and save output to CSV

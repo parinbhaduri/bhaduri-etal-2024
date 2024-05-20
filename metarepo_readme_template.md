@@ -1,14 +1,16 @@
 _your zenodo badge here_
 
-# lastname-etal_year_journal
+# Bhaduri-etal_2024_
 
 **Paper Title**
 
 Author 1<sup>1\*</sup> and Author 2<sup>1</sup>
 
-<sup>1</sup> Affiliation
+<sup>1</sup> Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA  
+<sup>2</sup> Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA  
+<sup>3</sup> Pacific Northwest National Laboratory, Richland, Washington, USA 
 
-\* corresponding author:  emailid@myuni.edu
+\* corresponding author:  pbb62@cornell.edu
 
 ## Abstract
 
@@ -34,7 +36,7 @@ References for all data used in your analysis. The specific version of the data 
 
 ### Input data
 
-Reference for each minted data source for your input data.  For example:
+Input data for Baltimore used during the CHANCE-C model simulations can be found under `model_inputs/` in the following Repository: 
 
 _Example_: Human, I.M. (2021). My input dataset name [Data set]. DataHub. https://doi.org/some-doi-number
 
@@ -46,12 +48,7 @@ _Example_: Human, I.M. (2021). My output dataset name [Data set]. DataHub. https
 
 ## Dependencies
 
-List packages (with versions) that you installed and relied on for your code (explicitly; any necessary "behind the scenes" packages that were installed by the package manager don't need to be mentioned), along with the versions (this will help ensure compatibility down the road). Depending on the package manager used, these may be easy to get from a `Project.toml`, `environment.yml`, or an analogous file. If you installed a package from its code repository, link to the repository and a link to its released version (ideally a DOI if available).
-
-| Package | Version | Repository Link | DOI |
-|-------|---------|-----------------|-----|
-| dependency 1 | version | -- | -- |
-| dependency 2 | version | link to code repository | link to DOI of release |
+This code is based on Julia 1.7. Relevant dependencies are in the `Project.toml` and `Manifest.toml` files (the `Manifest.jl` specifies the particular versions; this file should be kept as-is for perfect reproducibility but may need to be deleted and rebuilt with `Pkg.instantiate()` for different Julia versions).
 
 ## Contributing modeling software
 
@@ -59,8 +56,8 @@ If your experiment used models from another repository, link to those repositori
 
 | Model | Version | Repository Link | DOI |
 |-------|---------|-----------------|-----|
-| model 1 | version | link to code repository | link to DOI of release |
-| model 2 | version | link to code repository | link to DOI of release |
+| toy_model | - | https://github.com/parinbhaduri/flood-risk-abm |
+| CHANCE_C | 1.1.0 | https://github.com/srikrishnan-lab/CHANCE_C.jl/tree/dynamic_FF | link to DOI of release |
 | component 1 | version | link to code repository | link to DOI of release |
 
 ## How to reproduce the experiment
@@ -84,8 +81,21 @@ This section should consist of a walkthrough of how to reproduce your experiment
 | `compare_outputs.jl` | Script to compare my outputs to the original | `julia compare_outputs.jl` |
 
 ## Reproduce paper figures
-Use the scripts found in the `figures` directory to reproduce the figures used in this publication. It might be best practice to separate these scripts for each figure (or batch of figures) to improve readability and facilitate debugging.
+1. Run the relevant simulations above or download the results from the `dataframes/` folder . The necessary files are for each plot script file   
+2. Run the following scripts for each of the figures
 
-| Script Name | Description | How to Run |
+| Figure | Script name | How to Run |
 | --- | --- | --- |
-| `generate_hindcast.jl` | Script to generate a hindcast | `julia generate_hindcast-jl` |
+| Figure 2 | `model_landscape.jl` | `julia generate_hindcast-jl` |
+| Figure 3 | `plot_abm_ensemble.jl` | `julia generate_hindcast-jl` |
+| Figure 4 | `plot_breach_shape.jl` | `julia generate_hindcast-jl` |
+| Figure 5 | `SA_visualize.jl` | `julia generate_hindcast-jl` |
+| Figure 6 | `plot_pop_growth` | `julia generate_hindcast-jl` |
+| Figure 7 | `tbd` | `tbd` |
+| Figure 8 | `tbd` | `tbd` |
+| Figure A1 | `RA_curves.jl` | `julia generate_hindcast-jl` |
+| Figure A2 | `RA_curves.jl` | `julia generate_hindcast-jl` |
+| Figure A3 | `breach_curves.jl` | `julia generate_hindcast-jl` |
+| Figure A4 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
+| Figure A5 | `generate_hindcast-jl` | `julia generate_hindcast-jl` |
+

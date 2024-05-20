@@ -1,3 +1,7 @@
+#activate project environment
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 
 import GlobalSensitivityAnalysis as GSA
 using DataStructures

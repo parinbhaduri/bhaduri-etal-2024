@@ -2,7 +2,7 @@
 
 #activate project environment
 using Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 using CSV, DataFrames

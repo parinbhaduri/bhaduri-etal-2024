@@ -1,6 +1,6 @@
 #activate project environment
 using Pkg
-Pkg.activate(dirname(dirname(@__DIR__)))
+Pkg.activate(".")
 Pkg.instantiate()
 
 
