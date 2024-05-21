@@ -1,18 +1,17 @@
 ###Stores functions needed to calculate damage estimates
 function event_damage(model::ABM, ddf::DataFrame, surge_char::Dict{Float64}; scen::String)
     #Grab Block Group id, population, and cumulative housing value from the Block Group agents
-    pop_df = DataFrame(stack([[a.id, a.population, a.population * a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "bg_pop", "bg_val"])
+    pop_df = DataFrame(stack([[a.id, a.population * a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "bg_val"])
     #join pop data with the ABM dataframe
     base_df = leftjoin(model.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
     #Join ABM dataframe with depth-damage ensemble
     new_df = innerjoin(base_df, ddf, on= :GEOID => :bg_id)
 
-    ## calculate losses across event sizes
-    #Calculate ratio between BG flood loss and BG housing value
-    #for each intervention scenario and event
-    test_dam = select(new_df, r"naccs") ./ new_df.bg_val 
-    #Change inf values (price or pop is 0) to 0
-    test_dam .= ifelse.(test_dam .== Inf, 0.0, test_dam)
+    ## calculate cumulative losses across event sizes
+    #Calculate ratio between total BG flood loss and total BG housing value for each event 
+
+    #Calculate cumulative housing value across block groups
+    total_value = sum(new_df.bg_val)
 
     if scen == "levee"
         p_breach = sort(collect(values(surge_char)))
@@ -21,10 +20,10 @@ function event_damage(model::ABM, ddf::DataFrame, surge_char::Dict{Float64}; sce
     end
     
     #Calculate weighted average of losses for each event. Sum over block groups  
-    event_damages = sum(Matrix(select(test_dam, r"_Base_")) .* p_breach' .+ Matrix(select(test_dam, r"_Levee_")) .* (1 .-p_breach'), dims = 1)
-    return vec(event_damages)
+    event_damages = sum(Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach' .+ Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach'), dims = 1)
+    exp_loss = event_damages ./ total_value
+    return vec(exp_loss)
 end
-
 
 
 function risk_damage(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
@@ -56,3 +55,31 @@ function risk_damage(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_ye
     end
     return occupied, occupied_levee
 end
+
+"""
+function event_damage(model::ABM, ddf::DataFrame, surge_char::Dict{Float64}; scen::String)
+    #Grab Block Group id, population, and cumulative housing value from the Block Group agents
+    pop_df = DataFrame(stack([[a.id, a.population, a.population * a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "bg_pop", "bg_val"])
+    #join pop data with the ABM dataframe
+    base_df = leftjoin(model.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
+    #Join ABM dataframe with depth-damage ensemble
+    new_df = innerjoin(base_df, ddf, on= :GEOID => :bg_id)
+
+    ## calculate losses across event sizes
+    #Calculate ratio between BG flood loss and BG housing value
+    #for each intervention scenario and event
+    test_dam = select(new_df, r"naccs") ./ new_df.bg_val 
+    #Change inf values (price or pop is 0) to 0
+    test_dam .= ifelse.(test_dam .== Inf, 0.0, test_dam)
+
+    if scen == "levee"
+        p_breach = sort(collect(values(surge_char)))
+    else
+        p_breach = ones(length(keys(surge_char)))
+    end
+    
+    #Calculate weighted average of losses for each event. Sum over block groups  
+    event_damages = sum(Matrix(select(test_dam, r"_Base_")) .* p_breach' .+ Matrix(select(test_dam, r"_Levee_")) .* (1 .-p_breach'), dims = 1)
+    return vec(event_damages)
+end
+"""
