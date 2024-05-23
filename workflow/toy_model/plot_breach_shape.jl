@@ -10,9 +10,9 @@ using CairoMakie
 using FileIO
 
 ## Read in dataframes
-occ_low = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/breach_none.csv")))
-occ_med = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/breach_base.csv")))
-occ_high = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"dataframes/breach_high.csv")))
+occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_none.csv")))
+occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_base.csv")))
+occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_high.csv")))
 
 ret_per = range(10, 1000, length=100)
 threshold = zeros(length(ret_per))
