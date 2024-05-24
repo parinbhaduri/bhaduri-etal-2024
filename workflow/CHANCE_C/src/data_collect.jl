@@ -4,7 +4,11 @@ using Agents
 #Filter by BGs in/out floodplain
 BG(agent) = agent isa BlockGroup
 f_bgs(agent) = agent isa BlockGroup && agent.perc_fld_area > 0
-nf_bgs(agent) = agent isa BlockGroup && agent.perc_fld_area == 0
+nf_bgs(agent) = agent isa BlockGroup0 && agent.perc_fld_area == 0
+
+#Subset to Baltimore City
+f_c_bgs(agent) = agent isa BlockGroup && agent.county == 510 && agent.perc_fld_area > 0
+nf_c_bgs(agent) = agent isa BlockGroup && agent.county == 510 && agent.perc_fld_area == 0
 
 #Count HHAgents in BG
 bg_pop(agent) = length([a for a in agents_in_position(agent, model) if a isa HHAgent])

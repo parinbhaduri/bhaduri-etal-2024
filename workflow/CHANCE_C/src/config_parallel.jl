@@ -3,6 +3,7 @@ addprocs(12, exeflags="--project=$(Base.active_project())")
 
 @everywhere begin
     using CSV, DataFrames
+    using Statistics
     using Agents
     using CHANCE_C
     using LinearAlgebra
