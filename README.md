@@ -47,7 +47,7 @@ We used two models to conduct our experiments:  a stylized ABM created for a syn
 | `flood-risk-abm` | -       | https://github.com/parinbhaduri/flood-risk-abm                 |                        |
 | `CHANCE-C`       | 1.1.0   | https://github.com/srikrishnan-lab/CHANCE_C.jl/tree/dynamic_FF | link to DOI of release |
 
-Running the experiments in `toy_model/` requires cloning the `flood-risk-abm` repository. As long as the repository is in the correct location, the relevant workflow scripts should be able to import the necessary functions required to run the stylized experiments.
+Running the experiments in `toy_model/` requires cloning the `flood-risk-abm` repository. To use the toy model, clone the `flood_risk-abm` repository to the same location as As long as the repository is in the correct location, the relevant workflow scripts should be able to import the necessary functions required to run the stylized experiments.
 
 The CHANCE-C package is already listed in the `Project.toml` file and should automatically downloaded once the project environment is built. If CHANCE-C is unable to be imported or precompiled when running the Baltimore experiments, the package can be added to the project environment again using the following command:
 

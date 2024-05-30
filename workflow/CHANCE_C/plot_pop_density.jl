@@ -5,16 +5,17 @@ Pkg.instantiate()
 
 using CSV, DataFrames
 using Plots, StatsPlots
+using Plots.PlotMeasures
 using ColorSchemes
 
 ## Load abm data
-adf = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/adf_balt.csv")))
-mdf = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/mdf_balt.csv")))
+adf = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/adf_balt_city.csv")))
+mdf = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/mdf_balt_city.csv")))
 
-transform!(adf, [:sum_population_f_bgs, :sum_pop90_f_bgs] =>
+transform!(adf, [:sum_population_f_c_bgs, :sum_pop90_f_c_bgs] =>
                 ByRow((pop, pop90) -> 100 * (pop - pop90) / pop90) => :flood_pop_change)
                 
-transform!(adf, [:sum_population_nf_bgs, :sum_pop90_nf_bgs] =>
+transform!(adf, [:sum_population_nf_c_bgs, :sum_pop90_nf_c_bgs] =>
                 ByRow((pop, pop90) -> 100 * (pop - pop90) / pop90) => :nf_pop_change)
 
 #Select rows corresponding with the final model step 
@@ -38,20 +39,19 @@ adf_low_slr = subset(adf, :risk_averse => ByRow(isequal(0.7)), :slr => ByRow(ise
 dfs = [adf_high, adf_high_slr, adf_low, adf_low_slr]
 labels = ["No SLR, High RA", "SLR, High RA", "No SLR, Low RA", "SLR, Low RA"]
 
-p = Plots.plot(layout=(2, 2), dpi = 300, size = (900,600))
+p = Plots.plot(layout=(2, 2), dpi = 300)
 
 for i in eachindex(dfs)
     df_base = subset(dfs[i],:levee => ByRow(isequal(false)))
     df_levee = subset(dfs[i],:levee => ByRow(isequal(true)))
-    density!(p[i], df_base.sum_population_f_bgs, label="Baseline")
-    density!(p[i], df_levee.sum_population_f_bgs, label = "Levee")
+    histogram!(p[i], df_base.sum_population_f_c_bgs, alpha = 0.5, ticks = nothing, label="Baseline", left_margin = 5mm, bottom_margin = 5mm)
+    histogram!(p[i], df_levee.sum_population_f_c_bgs, alpha = 0.5, ticks = nothing, label = "Levee")
+    Plots.ylabel!(p[i], "Count"; yguidefontsize=10)
+    Plots.xlabel!(p[i], "Floodplain Population"; xguidefontsize=10)
+    #density!(p[i], df_base.sum_population_f_bgs, label="Baseline")
+    #density!(p[i], df_levee.sum_population_f_bgs, label = "Levee")
     Plots.title!(p[i], labels[i])
 end
-
-Plots.ylabel!(p[1], "Density")
-Plots.ylabel!(p[3], "Density")
-Plots.xlabel!(p[3], "Floodplain Population")
-Plots.xlabel!(p[4], "Floodplain Population")
 
 display(p)
 

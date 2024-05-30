@@ -3,6 +3,7 @@ using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
 
+using CHANCE_C
 using CSV, DataFrames
 using Statistics, StatsBase
 using CairoMakie
@@ -13,9 +14,19 @@ using FileIO
 base_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage.csv")))
 levee_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage.csv")))
 
+event_size = collect(range(0.75, 4.0, step = 0.25))
+seed_range = collect(range(1000,1999, step = 1))
+
+#Calculate scenario difference and determine seeds that show risk trensference
+diff_dam = Matrix(levee_dam) .- Matrix(base_dam) 
+pos_seeds = findall(i ->(i>0), diff_dam[end,:])
+
 value = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/total_val_default.csv")))
+val_pos = value[pos_seeds, :]
 
 val_diff = value[:,"levee"] - value[:,"base"]
+val_diff_pos = val_pos[:,"levee"] - val_pos[:,"base"]
+
 
 ## Calculate residual risk across realizations
 
@@ -38,6 +49,7 @@ base_risk = surge_rp' * Matrix(base_dam)
 levee_risk = surge_rp' * Matrix(levee_dam)
 
 resid_risk = levee_risk .- base_risk
+resid_pos = resid_risk[pos_seeds]
 
 
 ## Plot results
@@ -48,6 +60,7 @@ ax1 = Axis(val_fig[1, 1], ylabel = "Residual Risk", xlabel = "Difference in Valu
 
 CairoMakie.scatter!(ax1, val_diff, vec(resid_risk), color = "blue")
  #, label = false)
+CairoMakie.scatter!(ax1, val_diff_pos, vec(resid_pos), color = "orange")
 
 display(val_fig)
 
