@@ -5,6 +5,7 @@ Pkg.instantiate()
 
 using CSV, DataFrames
 using CairoMakie
+using ColorSchemes
 using FileIO
 
 #Read in Data

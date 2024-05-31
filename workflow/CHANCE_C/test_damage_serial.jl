@@ -66,15 +66,17 @@ breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood
 
 step!(model, dummystep, CHANCE_C.model_step!, 50)
 #Grab Block Group id, population, and cumulative housing value from the Block Group agents
-pop_df = DataFrame(stack([[a.id, a.population, a.population * a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "bg_pop", "bg_val"])
+pop_df = DataFrame(stack([[a.id, a.population, a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "pop", "avg_price"])
 #join pop data with the ABM dataframe
 base_df = leftjoin(model.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
 #Join ABM dataframe with depth-damage ensemble
 new_df = innerjoin(base_df, balt_ddf, on= :GEOID => :bg_id)
     
 ## calculate losses across event sizes
+bg_pop = new_df.pop
+bg_price = new_df.avg_price
 #Calculate cumulative housing value across block groups
-total_value = sum(new_df.bg_val) 
+total_value = sum(new_df.pop .* new_df.avg_price) 
 #Change inf values (price or pop is 0) to 0
 #test_dam .= ifelse.(test_dam .== Inf, 0.0, test_dam)
 scen = "base"   
@@ -85,8 +87,8 @@ else
 end
       
 #Calculate weighted average of losses for each event. Sum over block groups  
-event_damages = sum(Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach' .+ Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach'), dims = 1)
-exp_loss = event_damages ./ total_value
+event_damages = (Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach') .+ (Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach'))
+exp_loss = sum(bg_pop .* event_damages ./ bg_price, dims = 1)
 #return vec(event_damages)
 vec(exp_loss)
 

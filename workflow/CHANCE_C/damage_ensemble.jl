@@ -27,12 +27,25 @@ breach_prob = levee_breach.(m_to_ft.(surge_event); n_null = breach_null)
 surge_breach = Dict(zip(surge_event,breach_prob))
 
 #For Parallel:
-seed_range = range(1000, 1004, step = 1)
+seed_range = range(1000, 1999, step = 1)
+
+
 
 base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
+#Save Dataframes
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage.csv"), levee_damage)
 
+
+## Calculate total floodplain value across realizations
+
+bg_val = area_value(balt_ddf, surge_breach, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
+
+#Save Dataframes
+CSV.write(joinpath(@__DIR__,"dataframes/total_val_default.csv"), bg_val)
 
 
 
