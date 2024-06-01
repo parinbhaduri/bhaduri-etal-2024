@@ -53,7 +53,7 @@ end
 #define data
 data = GSA.SobolData(
     params = OrderedDict(:risk_averse => Uniform(0,1), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05),
-    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0,0.08), :base_move => Uniform(0.01,0.05),),
+    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.1,1.0), :base_move => Uniform(0.01,0.05),),
     N = 1000,
 )
 
