@@ -10,8 +10,8 @@ using CHANCE_C
 using LinearAlgebra
 
 #Set up parallell processors; Include necessary functions from other scripts
-include(joinpath(@__DIR__, "src/config.jl"))
-include("src/damage_functions.jl")
+include(joinpath(dirname(@__DIR__), "src/config.jl"))
+include(joinpath(dirname(@__DIR__), "src/damage_functions.jl"))
 
 #import input data 
 data_location = "baltimore-housing-data/model_inputs"
@@ -66,14 +66,16 @@ breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood
 
 step!(model, dummystep, CHANCE_C.model_step!, 50)
 #Grab Block Group id, population, and cumulative housing value from the Block Group agents
-pop_df = DataFrame(stack([[a.id, a.population, a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "pop", "avg_price"])
+pop_df = DataFrame(stack([[a.id, a.occupied_units, a.new_price] for a in allagents(model) if a isa BlockGroup], dims = 1), ["id", "pop", "avg_price"])
 #join pop data with the ABM dataframe
 base_df = leftjoin(model.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
 #Join ABM dataframe with depth-damage ensemble
 new_df = innerjoin(base_df, balt_ddf, on= :GEOID => :bg_id)
     
 ## calculate losses across event sizes
-bg_pop = new_df.pop
+#Find total number of Household Agents
+total_pop = length([a for a in allagents(model) if a isa HHAgent])
+bg_pop = new_df.pop ./ total_pop
 bg_price = new_df.avg_price
 #Calculate cumulative housing value across block groups
 total_value = sum(new_df.pop .* new_df.avg_price) 
@@ -88,7 +90,7 @@ end
       
 #Calculate weighted average of losses for each event. Sum over block groups  
 event_damages = (Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach') .+ (Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach'))
-exp_loss = sum(bg_pop .* event_damages ./ bg_price, dims = 1)
+exp_loss = sum(event_damages .* bg_pop, dims = 1)
 #return vec(event_damages)
 vec(exp_loss)
 

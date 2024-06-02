@@ -29,7 +29,7 @@ diff_UB = diff_UI[:,2]
 #Create backdrop
 fig = Figure(size = (900,600), fontsize = 16, pt_per_unit = 1, figure_padding = 10)
 
-ax1 = Axis(fig[1, 1], ylabel = "Difference in Loss (%)", xlabel = "Surge Event (m)",limits = ((0.75,4), nothing),
+ax1 = Axis(fig[1, 1], ylabel = "Difference in Loss", xlabel = "Surge Event (m)",limits = ((0.75,4), nothing),
  xgridvisible = false, titlealign = :center, title = "Comparing Flood Impact between Levee and Baseline Scenario")
 
 CairoMakie.lines!(ax1, event_size, diff_med, color = "orange", linewidth = 2.5)
