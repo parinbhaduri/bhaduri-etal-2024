@@ -8,6 +8,6 @@ BaltSim(;slr::Bool, no_of_years::Int64, perc_growth::Float64, house_choice_mode:
 
 
 #import input data 
-data_location = "baltimore-housing-data/model_inputs"
+data_location = "baltimore-data/model_inputs"
 balt_base = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_area_baltimore_base.csv")))
 balt_levee = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_area_baltimore_levee.csv")))
