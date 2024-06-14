@@ -10,8 +10,8 @@ using LinearAlgebra
 using Plots
 
 #Set up parallell processors; Include necessary functions from other scripts
-include(joinpath(@__DIR__, "src/config.jl"))
-include("src/damage_functions.jl")
+include(joinpath(dirname(@__DIR__), "src/config.jl"))
+include(joinpath(dirname(@__DIR__),"src/damage_functions.jl"))
 
 #import input data 
 data_location = "baltimore-housing-data/model_inputs"
