@@ -4,11 +4,11 @@ _your zenodo badge here_
 
 **Paper Title**
 
-Author 1 `<sup>`1\*`</sup>` and Author 2 `<sup>`1 `</sup>`
+Parin Bhaduri `<sup>1</sup>` , Adam B. Pollack `<sup>2</sup>`, James Yoon `<sup>3</sup>`, Pranab K. Roy Chowdhury `<sup>3</sup>`, Heng Wan `<sup>3</sup>`, David Judi `<sup>3</sup>`, Brent Daniel `<sup>3</sup>`, Vivek Srikrishnan `<sup>1</sup>`
 
-`<sup>`1 `</sup>` Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA
-`<sup>`2 `</sup>` Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA
-`<sup>`3 `</sup>` Pacific Northwest National Laboratory, Richland, Washington, USA
+`<sup>1</sup>` Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA
+`<sup>2</sup>` Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA
+`<sup>3</sup>` Pacific Northwest National Laboratory, Richland, Washington, USA
 
 \* corresponding author:  pbb62@cornell.edu
 
@@ -23,8 +23,6 @@ _Insert your paper reference. This can be a link to a preprint prior to publicat
 ## Code reference
 
 ## Data reference
-
-References for all data used in your analysis. The specific version of the data should be archived, in [Zenodo](https://zenodo.org) or elsewhere. The Cornell library has additional [information on data archiving resources](https://data.research.cornell.edu/content/sharing-and-archiving-data).
 
 ### Input data
 
@@ -74,9 +72,9 @@ This section should consist of a walkthrough of how to reproduce your experiment
    Pkg.activate(".") #from the cloned root directory
    Pkg.instantiate()
    ```
-2. Run the necessary scripts to re-simulate the example ensembles. Experiments for each example is located under `workflow/`
+2. Run the necessary scripts to re-simulate the example ensembles. Experiments for each example is located under `workflow/`. Note: We ran ABM scenario ensembles and flood impact summaries in parallel to speed up the data collection process. To change the number of worker processors, state the number of processors in the `addprocs()` command in the relevant parallel config file (`toy_model/src/parallel_setup.jl` or `CHANCE_C/src/config_parallel.jl`). By default, 12 worker processors are used. 
 
-To re-simulate the stylized experiments (`toy_model/`)
+To re-simulate the stylized experiments (`toy_model/`):
 
 | Script Name                | Description                                                      | How to Run                                          |
 | -------------------------- | ---------------------------------------------------------------- | --------------------------------------------------- |
@@ -85,7 +83,7 @@ To re-simulate the stylized experiments (`toy_model/`)
 | `pop_growth_ensemble.jl` | Flood impact summaries for different agent pop growth rates      | `julia workflow/toy_model/pop_growth_ensemble.jl` |
 | `factor_map_cluster.jl`  | Script to run Sobol Sensitivity Analysis on toy model parameters | `julia factor_map_cluster.jl`                     |
 
-to re-simulate CHANCE-C experiments (`CHANCE_C`):
+To re-simulate CHANCE-C experiments (`CHANCE_C`):
 
 | Script Name              | Description                                           | How to Run                                       |
 | ------------------------ | ----------------------------------------------------- | ------------------------------------------------ |
@@ -94,20 +92,19 @@ to re-simulate CHANCE-C experiments (`CHANCE_C`):
 
 ## Reproduce paper figures
 
-1. Run the relevant simulations above or use the results from the `dataframes/` folder . The necessary data inputs are automatically loaded for you in each plot script file.
+1. Run the relevant simulations above or use the results from the `dataframes/` folder. The necessary data inputs are automatically loaded for you in each plot script file.
 2. Run the following scripts for each of the figures
 
-| Figure    | Script name              | How to Run                                        | Output File                     |
-| --------- | ------------------------ | ------------------------------------------------- | ------------------------------- |
-| Figure 2  | `model_landscape.jl`   | `julia workflow/toy_model/model_landscape.jl`   | `figures/model_landscape.png` |
-| Figure 3  | `plot_abm_ensemble.jl` | `julia workflow/toy_model/model_landscape.jl`   | `figures/abm_ensemble.png`    |
-| Figure 4  | `plot_breach_shape.jl` | `julia workflow/toy_model/plot_breach_shape.jl` | `figures/risk_shifting.png`   |
-| Figure 5  | `SA_visualize.jl`      | `julia workflow/toy_model/SA_visualize.jl`      | `figures/first_order_100.png` |
-| Figure 6  | `plot_pop_growth.jl`   | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/pop_growth.png`      |
-| Figure 7  | `plot_risk_shift.jl`   | `julia workflow/CHANCE_C/plot_risk_shift.jl`    | `figures/balt_rs.png`         |
-| Figure 8  | `tbd`                  | `tbd`                                           | `figures/`                    |
-| Figure A1 | `RA_curves.jl`         | `julia workflow/toy_model/RA_curves.jl`         | `figures/log_func.png`        |
-| Figure A2 | `RA_curves.jl`         | `julia workflow/toy_model/RA_curves.jl`         | `figures/log_func_scale.png`  |
-| Figure A3 | `breach_curves.jl`     | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/breach_func.png`     |
-| Figure A4 | `tbd`                  | `tbd`                                           | `figures/`                    |
-| Figure A5 | `tbd`                  | `tbd`                                           | `figures/`                    |
+| Figure         | Script name              | How to Run                                        | Output File                                                           |
+| -------------- | ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------- |
+| Figure 2       | `model_landscape.jl`   | `julia workflow/toy_model/model_landscape.jl`   | `figures/model_landscape.png`                                       |
+| Figure 3       | `plot_abm_ensemble.jl` | `julia workflow/toy_model/model_landscape.jl`   | `figures/abm_ensemble.png`                                          |
+| Figure 4       | `plot_breach_shape.jl` | `julia workflow/toy_model/plot_breach_shape.jl` | `figures/risk_shifting.png`                                         |
+| Figure 5       | `SA_visualize.jl`      | `julia workflow/toy_model/SA_visualize.jl`      | `figures/first_order_100.png`                                       |
+| Figure 6       | `plot_pop_growth.jl`   | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/pop_growth.png`                                            |
+| Figure 7       | `plot_risk_shift.jl`   | `julia workflow/CHANCE_C/plot_risk_shift.jl`    | `figures/balt_rs.png`                                               |
+| Figure 8       | `tbd`                  | `tbd`                                           | `figures/`                                                          |
+| Figures A1, A2 | `RA_curves.jl`         | `julia workflow/toy_model/RA_curves.jl`         | A1:`figures/log_func.png` <br />A2: `figures/log_func_scale.png` |
+| Figure A3      | `breach_curves.jl`     | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/breach_func.png`                                           |
+| Figure A4      | `tbd`                  | `tbd`                                           | `figures/`                                                          |
+| Figure A5      | `tbd`                  | `tbd`                                           | `figures/`                                                          |

@@ -30,14 +30,14 @@ adf_levee_high = filter(:risk_averse => isequal(0.3), adf_levee)
 adf_levee_low = filter(:risk_averse => isequal(0.7), adf_levee)
 
 #Select one model realization to highlight in plots
-adf_show = filter(:seed => isequal(1897), adf_base)
-mdf_show = filter(:seed => isequal(1897), mdf_base)
+adf_show = filter(:seed => isequal(1005), adf_base)
+mdf_show = filter(:seed => isequal(1005), mdf_base)
 #Separate high RA and low RA
 adf_show_high = filter(:risk_averse => isequal(0.3), adf_show)
 adf_show_low = filter(:risk_averse => isequal(0.7), adf_show)
 
-adf_show_levee = filter(:seed => isequal(1897), adf_levee)
-mdf_show_levee = filter(:seed => isequal(1897), mdf_levee)
+adf_show_levee = filter(:seed => isequal(1005), adf_levee)
+mdf_show_levee = filter(:seed => isequal(1005), mdf_levee)
 #Separate high RA and low RA
 adf_show_levee_high = filter(:risk_averse => isequal(0.3), adf_show_levee)
 adf_show_levee_low = filter(:risk_averse => isequal(0.7), adf_show_levee)
