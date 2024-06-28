@@ -1,108 +1,97 @@
 ### Calculate expected flood losses at the BG level in the baseline and levee scenarios 
 # Determining how large the fixed effect parameter needs to be to result in risk transference
 ### 
+ 
+using Distributed
 
-#activate project environment
-using Pkg
-Pkg.activate(".")
-Pkg.instantiate()
+num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
+addprocs(num_cores)
 
-#Set up parallell processors; Include necessary functions from other scripts
-include(joinpath(@__DIR__, "src/config_parallel.jl"))
+# instantiate and precompile environment
+@everywhere begin
+  using Pkg;Pkg.activate("."); 
+  Pkg.instantiate(); Pkg.precompile()
+end
 
-#Define input parameters
-slr = true
-no_of_years = 50
-house_choice_mode = "flood_mem_utility"
-flood_coefficient = -10.0^5
-breach_null = 0.45 
-risk_averse = 0.7
-flood_mem = 10 
-base_move = 0.025
+@everywhere begin
+    using CSV, DataFrames
+    using Statistics
+    using Agents
+    using CHANCE_C
+    using LinearAlgebra
+    using Optim
+    using StatsBase
+end
 
-#For Parallel:
+@everywhere include(joinpath(@__DIR__, "src/damage_functions.jl"))
+
+##Input Data
+@everywhere begin
+    data_location = "baltimore-data/model_inputs"
+    balt_base = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_area_baltimore_base.csv")))
+    balt_levee = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_area_baltimore_levee.csv")))
+    balt_ddf = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "ddfs", "ens_agg_bg.csv")))
+end
+
+##Import results from original benchmark damage scenario (breaching, 1% pop growth)
+@everywhere begin
+    base_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage.csv")))
+    levee_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage.csv")))
+
+    #Calculate Median and 95% Uncertainty Interval
+    bench_diff = Matrix(levee_dam) .- Matrix(base_dam) 
+    bench_med = vec(mapslices(x -> median(x), diff_dam, dims=2))
+end
+
+## Create wrapper of Simulator function to avoid specifying input data and hyperparameters every time
+@everywhere begin 
+    BaltSim(;slr::Bool, no_of_years::Int64, perc_growth::Float64, house_choice_mode::String, flood_coefficient::Float64, levee::Bool, 
+    breach::Bool, breach_null::Float64, risk_averse::Float64, flood_mem::Int64, fixed_effect::Float64, base_move::Float64, seed::Int64) = Simulator(default_df, balt_base, balt_levee;  
+    slr = slr, slr_scen = [3.03e-3,7.878e-3,2.3e-2], scenario = "Baseline", intervention = "Baseline", start_year = 2018, no_of_years = no_of_years,  
+    pop_growth_perc = perc_growth, house_choice_mode = house_choice_mode, flood_coefficient = flood_coefficient, levee = levee, breach = breach, 
+    breach_null = breach_null, risk_averse = risk_averse, flood_mem = flood_mem, fixed_effect = fixed_effect, perc_move = base_move, seed = seed)
+
+    #wrapper function for risk_damage to just accept f_e term
+    risk_fe(f_e; perc_growth = 0.01) = risk_damage(balt_ddf, surge_overtop, seed_range;slr=true, no_of_years=50, perc_growth=perc_growth, house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
+    breach=false, breach_null=0.45, risk_averse=0.3, flood_mem=10, fixed_effect=f_e, base_move=0.025, showprogress = false)
+end
+
+
+
+## Find the fixed_effect parameter that approximates the median benchmark scenario
+
 seed_range = range(1000, 1999, step = 1)
 
-##Import results from benchmark damage scenario (breaching, 1% pop growth)
-base_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage.csv")))
-levee_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage.csv")))
+#Create function to run optimizer over
+function damage_optimizer(f_e)
+    #Calculate damages 
+    base, levee = risk_fe(f_e; perc_growth = 0.01)
+    #Calculate Median damage estimate
+    diff_dam = Matrix(levee) .- Matrix(base) 
+    diff_med = vec(mapslices(x -> median(x), diff_dam, dims=2))
+    #Calculate RMSE with benchmark
+    err = rmsd(bench_med, diff_med)
+    return err
+end
 
-#Calculate Median and 95% Uncertainty Interval
-diff_dam = Matrix(levee_dam) .- Matrix(base_dam) 
 
-diff_med = vec(mapslices(x -> median(x), diff_dam, dims=2))
-
-diff_UI = mapslices(x -> quantile(x, [0.025, 0.975]), diff_dam, dims=2)
-diff_LB = diff_UI[:,1]
-diff_UB = diff_UI[:,2]
+results = optimize(damage_optimizer, 0.0, 0.1; iterations = 100, show_trace = true)
 
 
-## Look at alternative benchmark scenario(no breaching, no pop growth)
+## Calculate damage ensemble using optimal fixed_effect parameter
 breach = false
-perc_growth = 0.0
-fixed_effect = 0.0
+perc_growth = 0.01
+fixed_effect = Optim.minimizer(results)
 
-#Calculate breach probability for each surge event (All zero since considering overtopping only)
-surge_event = collect(range(0.75,4.0, step=0.25))
-breach_prob = zeros(length(surge_event))
-
-surge_overtop = Dict(zip(surge_event,breach_prob))
-
-base_damage, levee_damage = risk_damage(balt_ddf, surge_overtop, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+base_optim, levee_optim = risk_damage(balt_ddf, surge_overtop, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
 #Save Dataframes
-CSV.write(joinpath(@__DIR__,"dataframes/base_event_lowRA_no_breach_no_growth.csv"), base_damage)
-CSV.write(joinpath(@__DIR__,"dataframes/levee_event_lowRA_no_breach_no_growth.csv"), levee_damage)
-#remove parallel processors
-rmprocs(workers())
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_no_optimFE_no_breach_pop_one.csv"), base_optim)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_optimFE_no_breach_pop_one.csv"), levee_optim)
 
-#using StatsBase
-#using Optim
+println("Optimal fixed effect parameter is: ", results.minimizer)
+println(results)
 
 
-using CairoMakie
 
-#base_null = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_no_breach_no_growth.csv")))
-#levee_null = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_no_breach_no_growth.csv")))
-
-#Calculate Median and 95% Uncertainty Interval
-diff_dam_null = Matrix(levee_damage) .- Matrix(base_damage) 
-    
-diff_med_null = vec(mapslices(x -> median(x), diff_dam_null, dims=2))
-    
-diff_UI_null = mapslices(x -> quantile(x, [0.025, 0.975]), diff_dam_null, dims=2)
-diff_LB_null = diff_UI_null[:,1]
-diff_UB_null = diff_UI_null[:,2]
-
-## Plot results
-#Create backdrop
-fig = Figure(size = (900,600), fontsize = 16, pt_per_unit = 1, figure_padding = 10)
-
-ax1 = Axis(fig[1, 1], ylabel = "Difference in Loss", xlabel = "Surge Event (m)",limits = ((0.75,4), nothing),
- xgridvisible = false, titlealign = :center, title = "Comparing Flood Impact between Levee and Baseline Scenario")
-
-#ax2 = Axis(fig[1, 2], ylabel = "Difference in Loss", xlabel = "Surge Event (m)",limits = ((0.75,4), nothing),
-# xgridvisible = false, titlealign = :center, title = "Comparing Flood Impact between Levee and Baseline Scenario")
-
-#linkaxes!(ax1, ax2)
-
-event_size = collect(range(0.75, 4.0, step = 0.25))
-threshold = zeros(length(event_size))
-
-CairoMakie.lines!(ax1, event_size, diff_med, color = "orange", linewidth = 2.5)
- #, label = false)
- 
-CairoMakie.band!(ax1, event_size, diff_LB, diff_UB, color = ("orange", 0.35))
- 
-CairoMakie.lines!(ax1, event_size, threshold, linestyle = :dash, color = "black", linewidth = 2)
-
-
-CairoMakie.lines!(ax1, event_size, diff_med_null, color = "blue", linewidth = 2.5)
- #, label = false)
- 
-CairoMakie.band!(ax1, event_size, diff_LB_null, diff_UB_null, color = ("blue", 0.35))
- 
-CairoMakie.lines!(ax1, event_size, threshold, linestyle = :dash, color = "black", linewidth = 2)
-
-display(fig)
