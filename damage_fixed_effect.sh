@@ -7,4 +7,4 @@
 #SBATCH --exclusive
 
 # Run the Julia code
-julia +1.7 damage_fixed_effect.jl
+julia +1.7 workflow/CHANCE_C/damage_fixed_effect.jl
