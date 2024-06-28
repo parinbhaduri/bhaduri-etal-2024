@@ -40,7 +40,7 @@ end
 
     #Calculate Median and 95% Uncertainty Interval
     bench_diff = Matrix(levee_dam) .- Matrix(base_dam) 
-    bench_med = vec(mapslices(x -> median(x), diff_dam, dims=2))
+    bench_med = vec(mapslices(x -> median(x), bench_diff, dims=2))
 end
 
 ## Create wrapper of Simulator function to avoid specifying input data and hyperparameters every time
