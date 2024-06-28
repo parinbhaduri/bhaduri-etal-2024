@@ -51,6 +51,12 @@ end
     pop_growth_perc = perc_growth, house_choice_mode = house_choice_mode, flood_coefficient = flood_coefficient, levee = levee, breach = breach, 
     breach_null = breach_null, risk_averse = risk_averse, flood_mem = flood_mem, fixed_effect = fixed_effect, perc_move = base_move, seed = seed)
 
+    #Calculate breach probability for each surge event (All zero since considering overtopping only)
+    surge_event = collect(range(0.75,4.0, step=0.25))
+    breach_prob = zeros(length(surge_event))
+
+    surge_overtop = Dict(zip(surge_event,breach_prob))
+
     #wrapper function for risk_damage to just accept f_e term
     risk_fe(f_e; perc_growth = 0.01) = risk_damage(balt_ddf, surge_overtop, seed_range;slr=true, no_of_years=50, perc_growth=perc_growth, house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
     breach=false, breach_null=0.45, risk_averse=0.3, flood_mem=10, fixed_effect=f_e, base_move=0.025, showprogress = false)
