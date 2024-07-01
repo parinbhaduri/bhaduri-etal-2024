@@ -71,7 +71,7 @@ seed_range = range(1000, 1999, step = 1)
 #Create function to run optimizer over
 function damage_optimizer(f_e)
     #Calculate damages 
-    base, levee = risk_fe(f_e; perc_growth = 0.01)
+    base, levee = risk_fe(f_e; perc_growth = 0.0)
     #Calculate Median damage estimate
     diff_dam = Matrix(levee) .- Matrix(base) 
     diff_med = vec(mapslices(x -> median(x), diff_dam, dims=2))
@@ -83,21 +83,21 @@ end
 
 results = optimize(damage_optimizer, 0.0, 0.1; iterations = 100, show_trace = true)
 
+println("Optimal fixed effect parameter is: ", results.minimizer)
+println(results)
 
 ## Calculate damage ensemble using optimal fixed_effect parameter
 breach = false
-perc_growth = 0.01
-fixed_effect = Optim.minimizer(results)
+perc_growth = 0.0
+fixed_effect = Optim.minimizer(results) #f_e = 5.697610e-03 w/ 1% growth
 
-base_optim, levee_optim = risk_damage(balt_ddf, surge_overtop, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
-    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
+base_optim, levee_optim = risk_fe(fixed_effect; perc_growth = perc_growth)
 
 #Save Dataframes
-CSV.write(joinpath(@__DIR__,"dataframes/base_event_no_optimFE_no_breach_pop_one.csv"), base_optim)
-CSV.write(joinpath(@__DIR__,"dataframes/levee_event_optimFE_no_breach_pop_one.csv"), levee_optim)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_optimFE_no_breach_no_growth.csv"), base_optim)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_optimFE_no_breach_no_growth.csv"), levee_optim)
 
-println("Optimal fixed effect parameter is: ", results.minimizer)
-println(results)
+
 
 
 
