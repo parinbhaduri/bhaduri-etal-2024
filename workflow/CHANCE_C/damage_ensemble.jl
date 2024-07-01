@@ -39,13 +39,23 @@ CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage.csv"), base_damage)
 CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage.csv"), levee_damage)
 
 
-## Calculate total floodplain value across realizations
+## Look at alternative benchmark scenario (no breaching, no pop growth)
+breach = false
+perc_growth = 0.0
+fixed_effect = 0.0
 
-bg_val = area_value(balt_ddf, surge_breach, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
-breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
+#Calculate breach probability for each surge event (All zero since considering overtopping only)
+surge_event = collect(range(0.75,4.0, step=0.25))
+breach_prob = zeros(length(surge_event))
+
+surge_overtop = Dict(zip(surge_event,breach_prob))
+
+base_damage, levee_damage = risk_damage(balt_ddf, surge_overtop, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
 #Save Dataframes
-CSV.write(joinpath(@__DIR__,"dataframes/total_val_default.csv"), bg_val)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_no_breach_no_growth.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_no_breach_no_growth.csv"), levee_damage)
 
 
 
