@@ -29,7 +29,7 @@ mdf_base = subset(mdf_base, :risk_averse => ByRow(isequal(0.3))) #Just grab one 
 mdf_levee = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/mdf_levee.csv")))
 mdf_levee = subset(mdf_levee, :risk_averse => ByRow(isequal(0.3)))
 
-function pop_response(mdf, adf_high, adf_low)
+function pop_response(mdf, adf)
     base_max_depth = combine(groupby(mdf, :seed), :floodepth => maximum => :max_depth, [:floodepth, :step] => ((depth,step) -> step[argmax(depth)])  => :step)
 
     max_high = Array{Union{Missing, Float64}}(missing,length(base_max_depth.seed),12)
@@ -38,13 +38,10 @@ function pop_response(mdf, adf_high, adf_low)
     for (row_index, row) in enumerate(eachrow(base_max_depth))
         pop_mem = row.step + 12 <= 50 ? range(row.step, row.step + 12, step = 1) : range(row.step, 50, step = 1)
 
-        max_resp_high = subset(adf_high, :seed => ByRow(isequal(row.seed)), :step => ByRow(step -> step in collect(pop_mem)))
+        max_resp_high = subset(adf, :seed => ByRow(isequal(row.seed)), :step => ByRow(step -> step in collect(pop_mem)))
         pop_high = [(max_resp_high.count_floodplain_fam[i] .- max_resp_high.count_floodplain_fam[i-1]) for i in 2:length(max_resp_high.count_floodplain_fam)]
-        max_resp_low = subset(adf_low, :seed => ByRow(isequal(row.seed)), :step => ByRow(step -> step in collect(pop_mem)))
-        pop_low = [(max_resp_low.count_floodplain_fam[i] .- max_resp_low.count_floodplain_fam[1]) for i in 2:length(max_resp_low.count_floodplain_fam)]
 
         max_high[row_index, 1:Int(length(pop_high))] = pop_high
-        max_low[row_index, 1:Int(length(pop_low))] = pop_low
     end
 
     #lev_height = GEV_return(1/100)
@@ -61,6 +58,7 @@ function pop_response(mdf, adf_high, adf_low)
     miss_ind = findall(ismissing, max_val)
     max_val = max_val[Not(miss_ind)]
     mem_cat = mem_cat[Not(miss_ind)]
+    
 
     return mem_cat, max_val
 end
@@ -80,11 +78,11 @@ fig = Figure(size = (1000, 1000))
 ga = fig[1, 1:2] = GridLayout()
 gb = fig[2, 1:2] = GridLayout()
 
-ax1 = Axis(ga[1, 1], ylabel = "Change in Population", xlabel = "time since major flood (years)", title = "Population Response after Major Flood Event",
+ax1 = Axis(ga[1, 1], ylabel = "Change in Population (count)", xlabel = "Time Since Major Flood (years)", title = "a. Floodplain Population Response after Major Flood Event in Baseline Scenario",
 limits = ((0,13), nothing), xgridvisible = false)
 hidespines!(ax1, :t, :r)
 
-ax2 = Axis(gb[1, 1], ylabel = "Difference in Population (count)", xlabel = "Model Timestep (year)", title = "Difference in Floodplain Population between Levee and Baseline Scenario", 
+ax2 = Axis(gb[1, 1], ylabel = "Difference in Population (count)", xlabel = "Model Timestep (year)", title = "b. Difference in Floodplain Population between Levee and Baseline Scenario", 
 limits = ((0,50), nothing), xgridvisible = false)
 hidespines!(ax2, :t, :r)
 
@@ -92,9 +90,19 @@ hidespines!(ax2, :t, :r)
 palette = ColorSchemes.okabe_ito
 
 #Plot Change in Population from year to year after Major Flood Event
-category, pop_change = pop_response(mdf_base, adf_base_high,adf_base_low)
+cat_high, pop_change_high = pop_response(mdf_base, adf_base_high)
+cat_low, pop_change_low = pop_response(mdf_base, adf_base_low)
 
-CairoMakie.boxplot!(ax1, category, pop_change, show_outliers = false)
+dodge = Int.(vcat(ones(length(cat_high)),ones(length(cat_low)) .+ 1))
+
+CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[2] : palette[1], dodge), show_outliers = false)
+
+#Create Legend
+elem_1 = [PolyElement(color = palette[2])]
+
+elem_2 = [PolyElement(color = palette[1])]
+
+axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :rb, orientation = :horizontal, framevisible = false)
 #CairoMakie.lines!(ax1, collect(0:15), vec(resp_med), color = "orange", linewidth = 2.5)
 #, label = false)
 
@@ -111,6 +119,8 @@ elem_1 = [LineElement(color = palette[2], linestyle = nothing)]
 
 elem_2 = [LineElement(color = palette[1], linestyle = nothing)]
 
-axislegend(ax2, [elem_1, elem_2] , ["High RA", "Low RA"], position = :lt, orientation = :horizontal, framevisible = false)
+axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal, framevisible = false)
 
 display(fig)
+
+CairoMakie.save(joinpath(pwd(),"figures/abm_evolution.png"), fig)
