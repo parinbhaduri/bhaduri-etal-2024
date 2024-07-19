@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=balt_disc
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=50
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=80
 #SBATCH --output=workflow/CHANCE_C/test/output_text.txt
 #SBATCH --error=workflow/CHANCE_C/test/error_text.txt
 #SBATCH --exclusive
