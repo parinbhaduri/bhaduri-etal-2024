@@ -1,9 +1,9 @@
 #File for running sensitivity analysis on Cluster 
-using Distributed
+using Distributed, SlurmClusterManager
 
 #num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
-#addprocs(num_cores)
-addprocs(12, exeflags="--project=$(Base.active_project())")
+addprocs(SlurmManager())
+
 # instantiate and precompile environment
 @everywhere begin
   using Pkg;Pkg.activate(@__DIR__); 
@@ -111,7 +111,7 @@ end
 data = GSA.SobolData(
     params = OrderedDict(:risk_averse => Uniform(0,1), :breach => Binomial(1, 0.5), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05),
     :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0, 0.1), :base_move => Uniform(0.01,0.05), :slr => Binomial(1, 0.5),),
-    N = 5,
+    N = 1000,
 )
 
 samples = GSA.sample(data)
