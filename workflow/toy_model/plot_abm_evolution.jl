@@ -91,9 +91,18 @@ palette = ColorSchemes.okabe_ito
 
 #Plot Change in Population from year to year after Major Flood Event
 cat_high, pop_change_high = pop_response(mdf_base, adf_base_high)
-cat_low, pop_change_low = pop_response(mdf_base, adf_base_high)
+cat_low, pop_change_low = pop_response(mdf_base, adf_base_low)
 
-CairoMakie.boxplot!(ax1, category, pop_change, show_outliers = false)
+dodge = Int.(vcat(ones(length(cat_high)),ones(length(cat_low)) .+ 1))
+
+CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[2] : palette[1], dodge), show_outliers = false)
+
+#Create Legend
+elem_1 = [PolyElement(color = palette[2])]
+
+elem_2 = [PolyElement(color = palette[1])]
+
+axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :rb, orientation = :horizontal, framevisible = false)
 #CairoMakie.lines!(ax1, collect(0:15), vec(resp_med), color = "orange", linewidth = 2.5)
 #, label = false)
 
@@ -110,7 +119,7 @@ elem_1 = [LineElement(color = palette[2], linestyle = nothing)]
 
 elem_2 = [LineElement(color = palette[1], linestyle = nothing)]
 
-axislegend(ax2, [elem_1, elem_2] , ["High RA", "Low RA"], position = :lt, orientation = :horizontal, framevisible = false)
+axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal, framevisible = false)
 
 display(fig)
 

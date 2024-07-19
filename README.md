@@ -1,10 +1,10 @@
 _your zenodo badge here_
 
-# Bhaduri-etal_2024_
+# Bhaduri-etal_2024_inprep
 
 **Paper Title**
 
-Parin Bhaduri `<sup>1</sup>` , Adam B. Pollack `<sup>2</sup>`, James Yoon `<sup>3</sup>`, Pranab K. Roy Chowdhury `<sup>3</sup>`, Heng Wan `<sup>3</sup>`, David Judi `<sup>3</sup>`, Brent Daniel `<sup>3</sup>`, Vivek Srikrishnan `<sup>1</sup>`
+ `Parin Bhaduri<sup>1*</sup>` , Adam B. Pollack `<sup>2</sup>`, James Yoon `<sup>3</sup>`, Pranab K. Roy Chowdhury `<sup>3</sup>`, Heng Wan `<sup>3</sup>`, David Judi `<sup>3</sup>`, Brent Daniel `<sup>3</sup>`, Vivek Srikrishnan `<sup>1</sup>`
 
 `<sup>1</sup>` Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA
 `<sup>2</sup>` Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA
@@ -72,7 +72,8 @@ This section should consist of a walkthrough of how to reproduce your experiment
    Pkg.activate(".") #from the cloned root directory
    Pkg.instantiate()
    ```
-2. Run the necessary scripts to re-simulate the example ensembles. Experiments for each example is located under `workflow/`. Note: We ran ABM scenario ensembles and flood impact summaries in parallel to speed up the data collection process. To change the number of worker processors, state the number of processors in the `addprocs()` command in the relevant parallel config file (`toy_model/src/parallel_setup.jl` or `CHANCE_C/src/config_parallel.jl`). By default, 12 worker processors are used. 
+2. Run the necessary scripts to re-simulate the example ensembles. Experiments for each example are located under `workflow/`. Note: We ran ABM scenario ensembles and flood impact summaries in parallel to speed up the data collection process. To change the number of worker processors, state the number of processors in the `addprocs()` command in the relevant parallel config file (`toy_model/src/parallel_setup.jl` or `CHANCE_C/src/config_parallel.jl`). By default, 12 worker processors are used.
+3. Some experimental scripts were written to be run in the Hopper HPC environment using the SLURM Task Manager.
 
 To re-simulate the stylized experiments (`toy_model/`):
 
@@ -81,14 +82,15 @@ To re-simulate the stylized experiments (`toy_model/`):
 | `abm_ensemble.jl`        | run ABM scenario ensembles and collect evolution data            | `julia workflow/toy_model/abm_ensemble.jl`        |
 | `breach_ensemble.jl`     | Flood Impact summaries for different levee breach likelihoods    | `julia workflow/toy_model/breach_ensemble.jl`     |
 | `pop_growth_ensemble.jl` | Flood impact summaries for different agent pop growth rates      | `julia workflow/toy_model/pop_growth_ensemble.jl` |
-| `factor_map_cluster.jl`  | Script to run Sobol Sensitivity Analysis on toy model parameters | `julia factor_map_cluster.jl`                     |
+| `factor_map_cluster.jl`  | Script to run Sobol Sensitivity Analysis on toy model parameters | `sbatch factor_map_cluster.sh`                    |
 
 To re-simulate CHANCE-C experiments (`CHANCE_C`):
 
-| Script Name              | Description                                           | How to Run                                       |
-| ------------------------ | ----------------------------------------------------- | ------------------------------------------------ |
-| `chance_c_ensemble.jl` | run ABM scenario ensembles and collect evolution data | `julia workflow/CHANCE_C/chance_c_ensemble.jl` |
-| `damage_ensemble.jl`   | Calculate flood damages across surge events           | `julia workflow/chance_C/damage_ensemble.jl`   |
+| Script Name                | Description                                           | How to Run                                       |
+| -------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
+| `chance_c_ensemble.jl`   | run ABM scenario ensembles and collect evolution data | `julia workflow/CHANCE_C/chance_c_ensemble.jl` |
+| `damage_ensemble.jl`     | Calculate flood damages across surge events           | `julia workflow/chance_C/damage_ensemble.jl`   |
+| `damage_fixed_effect.jl` |                                                       | `sbatch damage_fixed_effect.sh`                |
 
 ## Reproduce paper figures
 
