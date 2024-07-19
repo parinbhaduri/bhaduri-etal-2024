@@ -1,9 +1,9 @@
 #File for running sensitivity analysis on Cluster 
 using Distributed
 
-num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
-addprocs(num_cores)
-
+#num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
+#addprocs(num_cores)
+addprocs(12, exeflags="--project=$(Base.active_project())")
 # instantiate and precompile environment
 @everywhere begin
   using Pkg;Pkg.activate(@__DIR__); 
@@ -41,14 +41,6 @@ end
     pop_growth_perc = perc_growth, house_choice_mode = house_choice_mode, flood_coefficient = flood_coefficient, levee = levee, breach = breach, 
     breach_null = breach_null, risk_averse = risk_averse, flood_mem = flood_mem, fixed_effect = fixed_effect, perc_move = base_move, seed = seed)
 
-    #Calculate breach probability for each surge event (All zero since considering overtopping only)
-    surge_event = collect(range(0.75,4.0, step=0.25))
-    #Breaching scenarios
-    breach_prob = levee_breach.(m_to_ft.(surge_event); n_null = breach_null)
-    surge_breach = Dict(zip(surge_event,breach_prob))
-    #Overtopping only scenarios
-    overtop_only = zeros(length(surge_event))
-    surge_overtop = Dict(zip(surge_event,overtop_only))
 
     #Define Function to calculate return period from return level
     function GEV_rp(z_p, mu = μ, sig = σ, xi = ξ)
@@ -68,6 +60,7 @@ end
 
 #Set seed range
 seed_range = range(1000, 1999, step = 1)
+surge_event = collect(range(0.75,4.0, step=0.25))
 
 #create function to run model using samples
 function flood_scen(param_values::AbstractArray{<:Number, N}) where N
@@ -77,9 +70,16 @@ function flood_scen(param_values::AbstractArray{<:Number, N}) where N
 
     progress = Agents.ProgressMeter.Progress(numruns; enabled = true)
     #Select correct event dictionary based on breach occurrence in realization
-    breach_dict = Bool(param_values[1,2]) == true ? surge_breach : surge_overtop
-    base_dam, lev_dam = risk_damage(ddf, breach_dict, seed_range; slr=true, no_of_years=50, perc_growth=param_values[1,4], house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5,
-    breach=Bool(param_values[1,2]), breach_null=param_values[1,3], risk_averse=param_values[1,1], flood_mem=param_values[1,5], fixed_effect=param_values[1,6], base_move=param_values[1,7], showprogress = false)
+    if Bool(param_values[1,2]) #breach is true
+        breach_prob = levee_breach.(m_to_ft.(surge_event); n_null =param_values[1,3])
+        breach_dict = Dict(zip(surge_event,breach_prob))
+    else #breach is false, overtopping only
+        overtop_only = zeros(length(surge_event))
+        breach_dict = Dict(zip(surge_event,overtop_only))
+    end
+
+    base_dam, lev_dam = risk_damage(balt_ddf, breach_dict, seed_range; slr=Bool(param_values[1,8]), no_of_years=50, perc_growth=param_values[1,4], house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5,
+    breach=Bool(param_values[1,2]), breach_null=param_values[1,3], risk_averse=param_values[1,1], flood_mem=Int(param_values[1,5]), fixed_effect=param_values[1,6], base_move=param_values[1,7], showprogress = false)
 
     #Calculate Risk Shifting integral
     RSI = log.(sum(Matrix(lev_dam) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam) .* surge_rp, dims = 1))
@@ -87,9 +87,16 @@ function flood_scen(param_values::AbstractArray{<:Number, N}) where N
     Agents.ProgressMeter.next!(progress)
 
     Agents.ProgressMeter.progress_map(2:numruns; progress) do i
-        breach_dict = Bool(param_values[i,2]) == true ? surge_breach : surge_overtop
-        base_dam, lev_dam = risk_damage(ddf, breach_dict, seed_range; slr=true, no_of_years=50, perc_growth=param_values[i,4], house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
-        breach=Bool(param_values[i,2]), breach_null=param_values[i,3], risk_averse=param_values[i,1], flood_mem=param_values[i,5], fixed_effect=param_values[i,6], base_move=param_values[i,7], showprogress = false)
+         #Select correct event dictionary based on breach occurrence in realization
+        if Bool(param_values[i,2]) #breach is true
+            breach_prob = levee_breach.(m_to_ft.(surge_event); n_null =param_values[i,3])
+            breach_dict = Dict(zip(surge_event,breach_prob))
+        else #breach is false, overtopping only
+            overtop_only = zeros(length(surge_event))
+            breach_dict = Dict(zip(surge_event,overtop_only))
+        end
+        base_dam, lev_dam = risk_damage(balt_ddf, breach_dict, seed_range; slr=Bool(param_values[i,8]), no_of_years=50, perc_growth=param_values[i,4], house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
+        breach=Bool(param_values[i,2]), breach_null=param_values[i,3], risk_averse=param_values[i,1], flood_mem=Int(param_values[i,5]), fixed_effect=param_values[i,6], base_move=param_values[i,7], showprogress = false)
 
         #Calculate Risk Shifting integral
         RSI = log.(sum(Matrix(lev_dam) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam) .* surge_rp, dims = 1))
@@ -103,8 +110,8 @@ end
 #define data
 data = GSA.SobolData(
     params = OrderedDict(:risk_averse => Uniform(0,1), :breach => Binomial(1, 0.5), :breach_null => Uniform(0.3,0.5), :pop_growth => Uniform(0,0.05),
-    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0, 0.1), :base_move => Uniform(0.01,0.05),),
-    N = 1000,
+    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0, 0.1), :base_move => Uniform(0.01,0.05), :slr => Binomial(1, 0.5),),
+    N = 5,
 )
 
 samples = GSA.sample(data)
