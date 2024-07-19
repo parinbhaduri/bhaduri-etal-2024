@@ -1,4 +1,9 @@
 #File for running sensitivity analysis on Cluster 
+using Pkg
+Pkg.activate("."); 
+Pkg.instantiate()
+Pkg.precompile()
+
 using Distributed, SlurmClusterManager
 
 #num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
