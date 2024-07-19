@@ -51,7 +51,9 @@ elem_3 = [LineElement(color = "green", linestyle = :solid)]
 
 elem_4 = [LineElement(color = "purple", linestyle = :solid)]
 
-axislegend(ax1, [[elem_1, elem_2], [elem_3, elem_4]] , [["Median", "90% Interval"],["100-Year Event", "Flood Wall Height"]], ["Ensemble Summary", "Design Levels"], position = :lt, orientation = :vertical, framevisible = false)
+axislegend(ax1, [[elem_1, elem_2], [elem_3, elem_4]] , [["Median", "90% Interval"],
+["100-Year Event", "Flood Wall Height"]], ["Ensemble Summary", "Design Levels"], 
+position = :lt, orientation = :vertical, framevisible = false)
 
 display(fig)
 

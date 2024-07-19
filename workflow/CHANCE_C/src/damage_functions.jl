@@ -32,14 +32,14 @@ function event_damage(model::ABM, ddf::DataFrame, surge_char::Dict{Float64}; sce
 end
 
 
-function risk_damage(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+function risk_damage(ddf, breach_dict, seed_range; slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
     #Create model ensembles based on input parameters
-    models = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
+    models = [BaltSim(;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
 
-    models_levee = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=true,
+    models_levee = [BaltSim(;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=true,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
 
     #Evolve models. Calculate damages
@@ -62,14 +62,14 @@ function risk_damage(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_ye
     return occupied, occupied_levee
 end
 
-function area_value(ddf, breach_dict, seed_range; slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+function area_value(ddf, breach_dict, seed_range; slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
     ### Returns the total block group value before flood damages. Function runs ABM scenarios across seed range and calculates total value
     #Create model ensembles based on input parameters
-    models = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
+    models = [BaltSim(;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
 
-    models_levee = [BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=true,
+    models_levee = [BaltSim(;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=true,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=i) for i in seed_range]
 
     #Evolve models. Calculate damages

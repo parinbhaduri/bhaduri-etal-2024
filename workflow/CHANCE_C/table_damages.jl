@@ -15,11 +15,13 @@ base_loss = sum(Matrix(select(balt_ddf, r"naccs_loss_Base")), dims = 1)
 levee_loss = sum(Matrix(select(balt_ddf, r"naccs_loss_Levee")), dims = 1)
 loss_diff = vec(levee_loss) .- vec(base_loss)
 
-data = hcat(surge_event, vec(levee_loss) ./ 1e6, vec(base_loss) ./ 1e6, loss_diff)
+data = hcat(surge_event, vec(levee_loss), vec(base_loss), loss_diff)
 
 header = (
     ["Surge Event", "Levee Flood Loss", "Baseline Flood Loss", "Difference in Loss"],
-    ["(m)", "(\$ Millions)", "(\$ Millions)", "(\$)"]
+    ["(m)", "(\$)", "(\$)", "(\$)"]
 )
 
-pretty_table(data; header = header)
+open(joinpath(pwd(),"figures/damages.html"), "w") do f
+pretty_table(f, data; backend = Val(:html), tf = tf_html_minimalist, header = header)
+end
