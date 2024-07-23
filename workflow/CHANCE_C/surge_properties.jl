@@ -1,6 +1,6 @@
 #Find Parameters
 import Pkg
-Pkg.activate(pwd())
+Pkg.activate(".")
 Pkg.instantiate()
 
 using Extremes
@@ -61,7 +61,7 @@ gev_rng = MersenneTwister(1897)
 flood_record = [GEV_event(gev_rng) for _ in 1:1000]
 # Sea Level Rise
 #high scenario of SL change projection for 2031 is 0.28m and 2.57m for 2130 (NOAA)
-high_slr = repeat([0.022 * i for i in 1:50], 20)
+high_slr = repeat([0.023 * i for i in 1:50], 20)
 slr_record = flood_record .+ high_slr
 
 #Count number of occurences of each surge event  

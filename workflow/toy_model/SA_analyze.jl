@@ -21,13 +21,13 @@ data = GSA.SobolData(
 )
 
 #load outcomes from csv file 
-sa_df = DataFrame(CSV.File(joinpath(@__DIR__,"output/SA_Results/factor_map_table_100.csv")))
+sa_df = DataFrame(CSV.File(joinpath(@__DIR__,"SA_Results/factor_map_table_100.csv")))
 
 #analyze
 sobol_results = GSA.analyze(data, sa_df.RSI)
 #save dictionary
 using FileIO
-save(joinpath(@__DIR__,"output/SA_Results/sobol_results_100.jld2"), sobol_results)
+save(joinpath(@__DIR__,"SA_Results/sobol_results_100.jld2"), sobol_results)
 
 
 

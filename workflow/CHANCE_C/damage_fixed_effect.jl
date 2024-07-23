@@ -1,7 +1,10 @@
 ### Calculate expected flood losses at the BG level in the baseline and levee scenarios 
 # Determining how large the fixed effect parameter needs to be to result in risk transference
 ### 
- 
+using Pkg
+Pkg.activate("."); 
+Pkg.instantiate()
+
 using Distributed
 
 num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
@@ -45,9 +48,9 @@ end
 
 ## Create wrapper of Simulator function to avoid specifying input data and hyperparameters every time
 @everywhere begin 
-    BaltSim(;slr::Bool, no_of_years::Int64, perc_growth::Float64, house_choice_mode::String, flood_coefficient::Float64, levee::Bool, 
+    BaltSim(;slr_scen::String, no_of_years::Int64, perc_growth::Float64, house_choice_mode::String, flood_coefficient::Float64, levee::Bool, 
     breach::Bool, breach_null::Float64, risk_averse::Float64, flood_mem::Int64, fixed_effect::Float64, base_move::Float64, seed::Int64) = Simulator(default_df, balt_base, balt_levee;  
-    slr = slr, slr_scen = [3.03e-3,7.878e-3,2.3e-2], scenario = "Baseline", intervention = "Baseline", start_year = 2018, no_of_years = no_of_years,  
+    slr_scen = slr_scen, slr_rate = [3.03e-3,7.878e-3,2.3e-2], scenario = "Baseline", intervention = "Baseline", start_year = 2018, no_of_years = no_of_years,  
     pop_growth_perc = perc_growth, house_choice_mode = house_choice_mode, flood_coefficient = flood_coefficient, levee = levee, breach = breach, 
     breach_null = breach_null, risk_averse = risk_averse, flood_mem = flood_mem, fixed_effect = fixed_effect, perc_move = base_move, seed = seed)
 
@@ -58,7 +61,7 @@ end
     surge_overtop = Dict(zip(surge_event,breach_prob))
 
     #wrapper function for risk_damage to just accept f_e term
-    risk_fe(f_e; perc_growth = 0.01) = risk_damage(balt_ddf, surge_overtop, seed_range;slr=true, no_of_years=50, perc_growth=perc_growth, house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
+    risk_fe(f_e; perc_growth = 0.01) = risk_damage(balt_ddf, surge_overtop, seed_range;slr_scen="high", no_of_years=50, perc_growth=perc_growth, house_choice_mode="flood_mem_utility", flood_coefficient=-10.0^5, 
     breach=false, breach_null=0.45, risk_averse=0.3, flood_mem=10, fixed_effect=f_e, base_move=0.025, showprogress = false)
 end
 
@@ -81,7 +84,8 @@ function damage_optimizer(f_e)
 end
 
 
-results = optimize(damage_optimizer, 0.0, 0.1; iterations = 100, show_trace = true)
+results = optimize(damage_optimizer, 0.0, 0.1; iterations = 100, store_trace = true, show_trace = true)
+trace = Optim.trace(results)
 
 println("Optimal fixed effect parameter is: ", results.minimizer)
 println(results)

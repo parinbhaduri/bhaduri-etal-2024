@@ -7,7 +7,7 @@ using CairoMakie
 using ColorSchemes
 #using InteractiveDynamics
 #import breach functions from toy model
-include(joinpath(dirname(@__DIR__), "src/toy_ABM_functions.jl"))
+include(joinpath(@__DIR__, "src/toy_ABM_functions.jl"))
 
 test_abm = flood_ABM(;)
 length_x, length_y = size(test_abm.Elevation)
@@ -18,7 +18,7 @@ model_fig = Figure(size = (500,900), fontsize = 16, pt_per_unit = 1, figure_padd
 ax1 = Axis(model_fig[1,1], aspect = 1, titlealign = :left, title = "a. Flood Return Periods (Years)")
 hidedecorations!(ax1)
 
-ax2 = Axis(model_fig[1,3], aspect = 1, titlealign = :left, title = "b. Structural Utility Values (\$ thousands)")
+ax2 = Axis(model_fig[1,3], aspect = 1, titlealign = :left, title = "b. Structural Utility Values (thousands)")
 hidedecorations!(ax2)
 
 ##Create heatmap for Flood level GEV_return
@@ -67,7 +67,7 @@ um = CairoMakie.heatmap!(ax2, 1:length_x, 1:length_y, util_mat, colormap = cgrad
 Colorbar(model_fig[1, 4], um, ticks = ([3e5,4e5,5e5,6e5], ["300","400","500", "600"]))
 
 rowsize!(model_fig.layout, 1, Aspect(1, 1))
-model_fig
+display(model_fig)
 
 
 CairoMakie.save(joinpath(pwd(),"figures/model_landcape.png"), model_fig)

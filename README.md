@@ -73,7 +73,7 @@ This section should consist of a walkthrough of how to reproduce your experiment
    Pkg.instantiate()
    ```
 2. Run the necessary scripts to re-simulate the example ensembles. Experiments for each example are located under `workflow/`. Note: We ran ABM scenario ensembles and flood impact summaries in parallel to speed up the data collection process. To change the number of worker processors, state the number of processors in the `addprocs()` command in the relevant parallel config file (`toy_model/src/parallel_setup.jl` or `CHANCE_C/src/config_parallel.jl`). By default, 12 worker processors are used.
-3. Some experimental scripts were written to be run in the Hopper HPC environment using the SLURM Task Manager.
+3. Two scripts in the working directory (`factor_map_cluster.sh` and `damage_fixed_effect.sh`) were written to be run in the Hopper HPC environment using the SLURM Task Manager.
 
 To re-simulate the stylized experiments (`toy_model/`):
 
@@ -82,7 +82,7 @@ To re-simulate the stylized experiments (`toy_model/`):
 | `abm_ensemble.jl`        | run ABM scenario ensembles and collect evolution data            | `julia workflow/toy_model/abm_ensemble.jl`        |
 | `breach_ensemble.jl`     | Flood Impact summaries for different levee breach likelihoods    | `julia workflow/toy_model/breach_ensemble.jl`     |
 | `pop_growth_ensemble.jl` | Flood impact summaries for different agent pop growth rates      | `julia workflow/toy_model/pop_growth_ensemble.jl` |
-| `factor_map_cluster.jl`  | Script to run Sobol Sensitivity Analysis on toy model parameters | `sbatch factor_map_cluster.sh`                    |
+| `factor_map_cluster.sh`  | Script to run Sobol Sensitivity Analysis on toy model parameters | `sbatch factor_map_cluster.sh`                    |
 
 To re-simulate CHANCE-C experiments (`CHANCE_C`):
 
@@ -90,23 +90,25 @@ To re-simulate CHANCE-C experiments (`CHANCE_C`):
 | -------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
 | `chance_c_ensemble.jl`   | run ABM scenario ensembles and collect evolution data | `julia workflow/CHANCE_C/chance_c_ensemble.jl` |
 | `damage_ensemble.jl`     | Calculate flood damages across surge events           | `julia workflow/chance_C/damage_ensemble.jl`   |
-| `damage_fixed_effect.jl` |                                                       | `sbatch damage_fixed_effect.sh`                |
+| `damage_fixed_effect.sh` |                                                       | `sbatch damage_fixed_effect.sh`                |
 
 ## Reproduce paper figures
 
 1. Run the relevant simulations above or use the results from the `dataframes/` folder. The necessary data inputs are automatically loaded for you in each plot script file.
 2. Run the following scripts for each of the figures
 
-| Figure         | Script name              | How to Run                                        | Output File                                                           |
-| -------------- | ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------- |
-| Figure 2       | `model_landscape.jl`   | `julia workflow/toy_model/model_landscape.jl`   | `figures/model_landscape.png`                                       |
-| Figure 3       | `plot_abm_ensemble.jl` | `julia workflow/toy_model/model_landscape.jl`   | `figures/abm_ensemble.png`                                          |
-| Figure 4       | `plot_breach_shape.jl` | `julia workflow/toy_model/plot_breach_shape.jl` | `figures/risk_shifting.png`                                         |
-| Figure 5       | `SA_visualize.jl`      | `julia workflow/toy_model/SA_visualize.jl`      | `figures/first_order_100.png`                                       |
-| Figure 6       | `plot_pop_growth.jl`   | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/pop_growth.png`                                            |
-| Figure 7       | `plot_risk_shift.jl`   | `julia workflow/CHANCE_C/plot_risk_shift.jl`    | `figures/balt_rs.png`                                               |
-| Figure 8       | `tbd`                  | `tbd`                                           | `figures/`                                                          |
-| Figures A1, A2 | `RA_curves.jl`         | `julia workflow/toy_model/RA_curves.jl`         | A1:`figures/log_func.png` <br />A2: `figures/log_func_scale.png` |
-| Figure A3      | `breach_curves.jl`     | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/breach_func.png`                                           |
-| Figure A4      | `tbd`                  | `tbd`                                           | `figures/`                                                          |
-| Figure A5      | `tbd`                  | `tbd`                                           | `figures/`                                                          |
+| Figure         | Script name               | How to Run                                        | Output File                                                             |
+| -------------- | ------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------- |
+| Figure 2       | `model_landscape.jl`    | `julia workflow/toy_model/model_landscape.jl`   | `figures/model_landscape.png`                                         |
+| Figure 3       | `plot_abm_evolution.jl` | `julia workflow/toy_model/model_landscape.jl`   | `figures/abm_evolution.png`                                           |
+| Figure 4       | `plot_breach_shape.jl`  | `julia workflow/toy_model/plot_breach_shape.jl` | `figures/risk_shifting.png`                                           |
+| Figure 5       | `SA_visualize.jl`       | `julia workflow/toy_model/SA_visualize.jl`      | `figures/first_order_100.png`                                         |
+| Figure 6       | `plot_pop_growth.jl`    | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/pop_growth.png`                                              |
+| Figure 7       | `plot_risk_shift.jl`    | `julia workflow/CHANCE_C/plot_risk_shift.jl`    | `figures/balt_rs.png`                                                 |
+| Figure 8       | `tbd`                   | `tbd`                                           | `figures/`                                                            |
+| Figures A1, A2 | `RA_curves.jl`          | `julia workflow/toy_model/RA_curves.jl`         | A1:`figures/log_func.png` <br />A2: `figures/log_func_scale.png`   |
+| Figure A3      | `breach_curves.jl`      | `julia workflow/toy_model/plot_pop_growth.jl`   | `figures/breach_func.png`                                             |
+| Figure A4, A5  | `surge_properties.jl`   | `julia workflow/CHANCE_C/surge_properties.jl`   | A4:`figures/ret_level_plt.png`<br />A5:`figures/surge_interval.png` |
+| Figure A7      | `plot_flood_coef.jl`    | `julia workflow/CHANCE_C/plot_flood_coef.jl`    | `figures/disamen_coef.png`                                            |
+| Figure A8      | `plot_ensemble.jl`      | `julia workflow/CHANCE_C/plot_ensemble.jl`      | `figures/chance_c_ensemble_city.png`                                  |
+| Figure A9      | `plot_pop_density.jl`   | `julia workflow/CHANCE_C/plot_pop_density.jl`   | `figures/final_pop_dens.png`                                          |

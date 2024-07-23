@@ -11,15 +11,15 @@ using FileIO
 
 ## Read in dataframes
 occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_none.csv")))
-occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_base.csv")))
-occ_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_high.csv")))
+occ_med = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_base.csv")))
+occ_high = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_high.csv")))
 
 ret_per = range(10, 1000, length=100)
 threshold = zeros(length(ret_per))
 
 ## Plot results
 #Create backdrop
-fig = Figure(size = (900,600), fontsize = 16, pt_per_unit = 1, figure_padding = 10)
+fig = Figure(size = (900,600), fontsize = 16, pt_per_unit = 1, figure_padding = 18)
 
 ax1 = Axis(fig[1, 1:2], ylabel = "Difference in Occupied Exposure", xlabel = "Return Period (years)", xscale = log10,
  xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "a. Comparing Flood Impact between Levee and Baseline Scenario")
@@ -66,7 +66,7 @@ CairoMakie.lines!(ax3, ret_per, threshold, linestyle = :dash, color = "black", l
 
 #Plots.title!("vulnerable (High Likelihood of breaching)")
 
-fig
+display(fig)
 
 CairoMakie.save(joinpath(pwd(),"figures/risk_shifting.png"), fig)
 
