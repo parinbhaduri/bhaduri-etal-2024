@@ -103,7 +103,7 @@ end
 
 #Multiple seeds
 function risk_shift(Elev, seed_range; risk_averse = 0.3, levee = 1/100, breach = true, 
-    pop_growth = 0.0, breach_null = 0.45, mem = 10, fe = 1.0, prob_move = 0.025,  N = 1200,
+    pop_growth = 0.0, breach_null = 0.4, mem = 10, fe = 1.0, prob_move = 0.025,  N = 1200,
      metric = "df", parallel = false, showprogress = false)
 
     flood_rps = range(10,1000, step = 10)
