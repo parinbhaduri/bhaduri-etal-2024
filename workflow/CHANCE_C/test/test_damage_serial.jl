@@ -19,6 +19,8 @@ balt_base = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_ar
 balt_levee = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "surge_area_baltimore_levee.csv")))
 
 balt_ddf = DataFrame(CSV.File(joinpath(dirname(pwd()), data_location, "ddfs", "ens_agg_bg.csv")))
+#sum(eachcol(select(balt_ddf, r"loss_diff")))
+#sum(eachcol(select(balt_ddf, r"depth_diff")))
 
 #Define input parameters
 slr = true
@@ -26,11 +28,11 @@ no_of_years = 50
 perc_growth = 0.01
 house_choice_mode = "flood_mem_utility"
 flood_coefficient = -10.0^5
-breach = false
+breach = true
 breach_null = 0.45 
 risk_averse = 0.3
 flood_mem = 10
-fixed_effect = 0.08 
+fixed_effect = 0.0 
 base_move = 0.025
 
 #Calculate breach likelihood for each surge event
@@ -38,7 +40,6 @@ surge_event = collect(range(0.75,4.0, step=0.25))
 breach_prob = levee_breach.(m_to_ft.(surge_event); n_null = breach_null)
 
 surge_breach = Dict(zip(surge_event,breach_prob))
-
 ##  Calculate expected losses
 
 #For serial: 
@@ -63,7 +64,7 @@ end
 
 #Test damage calculations 
 model_base = BaltSim(;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient, levee=false,
-breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=1897)
+breach=false, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, seed=1897)
 
 step!(model_base, dummystep, CHANCE_C.model_step!, 50)
 #Grab Block Group id, population, and cumulative housing value from the Block Group agents
@@ -100,14 +101,14 @@ step!(model_levee, dummystep, CHANCE_C.model_step!, 50)
 #Grab Block Group id, population, and cumulative housing value from the Block Group agents
 pop_df = DataFrame(stack([[a.id, a.occupied_units, a.new_price] for a in allagents(model_levee) if a isa BlockGroup], dims = 1), ["id", "pop", "avg_price"])
 #join pop data with the ABM dataframe
-lev_df = leftjoin(model_levee.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
+base_df = leftjoin(model_levee.df[:,[:fid_1, :GEOID, :new_price]], pop_df, on=:fid_1 =>:id)
 #Join ABM dataframe with depth-damage ensemble
-new_lev_df = innerjoin(lev_df, balt_ddf, on= :GEOID => :bg_id)
+new_df = innerjoin(base_df, balt_ddf, on= :GEOID => :bg_id)
     
 ## calculate losses across event sizes
 #Find total number of Household Agents
 total_pop_levee = length([a for a in allagents(model_levee) if a isa HHAgent])
-bg_pop_levee = new_lev_df.pop ./ total_pop_levee
+bg_pop_levee = new_df.pop ./ total_pop_levee
 bg_price_levee = new_df.avg_price
 #Calculate cumulative housing value across block groups
 total_value = sum(new_df.pop .* new_df.avg_price) 
@@ -116,8 +117,6 @@ total_value = sum(new_df.pop .* new_df.avg_price)
 scen = "levee"   
 p_breach_levee = sort(collect(values(surge_breach)))
 
-scen = "overtop"   
-p_breach_levee = zeros(length(keys(surge_breach)))
       
 #Calculate weighted average of losses for each event. Sum over block groups  
 event_damages_levee = (Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach_levee') .+ (Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach_levee'))
@@ -126,20 +125,12 @@ exp_loss_levee = sum(event_damages_levee .* bg_pop_levee, dims = 1)
 vec(exp_loss_levee)
 
 #for scen == "base"
-sum(Matrix(select(new_lev_df, r"naccs_loss_Base")) .* p_breach' .+ Matrix(select(new_lev_df, r"naccs_loss_Levee")) .* (1 .- p_breach'), dims = 1) == sum(Matrix(select(new_df, r"naccs_loss_Base")), dims = 1)
+sum(Matrix(select(new_df, r"naccs_loss_Base")) .* p_breach' .+ Matrix(select(new_df, r"naccs_loss_Levee")) .* (1 .- p_breach'), dims = 1) == sum(Matrix(select(new_df, r"naccs_loss_Base")), dims = 1)
 
 #for scen == levee
-Matrix(select(new_df, r"naccs_loss_Levee")) == event_damages_levee
+Matrix(select(new_df, r"naccs_loss_Levee"))[:,1:5] == event_damages_levee[:,1:5]
 
 sum(Matrix(select(new_df, r"naccs_loss_Levee"))[:,1:5] .- Matrix(select(new_df, r"naccs_loss_Base"))[:,1:5], dims = 1)
-
-(event_damages_levee .- event_damages_base)
-(bg_pop_levee .- bg_pop_base)
-((event_damages_levee .* bg_pop_levee) .- (event_damages_base .* bg_pop_base))
-
-median((event_damages_levee .* bg_pop_levee) .- (event_damages_base .* bg_pop_base), dims = 2)
-
-#Identify block groups with highest population and find associated difference in damages
 
 #Plot
 using Plots

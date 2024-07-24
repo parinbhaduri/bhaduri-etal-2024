@@ -22,22 +22,22 @@ transform!(adf, [:sum_population_nf_c_bgs, :sum_pop90_nf_c_bgs] =>
 filter!(row -> (row.step == 50), adf)
 
 #Subset dataframes by scenario
-adf_high = subset(adf, :risk_averse => ByRow(isequal(0.3)), :slr => ByRow(isequal(false)))
-adf_high_slr = subset(adf, :risk_averse => ByRow(isequal(0.3)), :slr => ByRow(isequal(true)))
+adf_high_slr_high = subset(adf, :risk_averse => ByRow(isequal(0.3)), :slr_scen => ByRow(isequal("high")))
+adf_high_slr_low = subset(adf, :risk_averse => ByRow(isequal(0.3)), :slr_scen => ByRow(isequal("low")))
 
 #adf_base_high = subset(adf_base, :risk_averse => ByRow(isequal(0.3)))
 #adf_base_low = subset(adf_base,  :risk_averse => ByRow(isequal(0.7)))
 
 
-adf_low = subset(adf, :risk_averse => ByRow(isequal(0.7)), :slr => ByRow(isequal(false)))
-adf_low_slr = subset(adf, :risk_averse => ByRow(isequal(0.7)), :slr => ByRow(isequal(true)))
+adf_low_slr_high = subset(adf, :risk_averse => ByRow(isequal(0.7)), :slr_scen => ByRow(isequal("high")))
+adf_low_slr_low = subset(adf, :risk_averse => ByRow(isequal(0.7)), :slr_scen => ByRow(isequal("low")))
 
 #adf_levee_high = subset(adf_levee, :risk_averse => ByRow(isequal(0.3)))
 #adf_levee_low = subset(adf_levee, :risk_averse => ByRow(isequal(0.7)))
 
 ## Create density plots
-dfs = [adf_high, adf_high_slr, adf_low, adf_low_slr]
-labels = ["No SLR, High RA", "SLR, High RA", "No SLR, Low RA", "SLR, Low RA"]
+dfs = [adf_high_slr_low, adf_high_slr_high, adf_low_slr_low, adf_low_slr_high]
+labels = ["Low SLR, High RA", "High SLR, High RA", "Low SLR, Low RA", "High SLR, Low RA"]
 
 p = Plots.plot(layout=(2, 2), dpi = 300)
 
