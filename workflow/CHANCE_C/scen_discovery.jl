@@ -1,5 +1,9 @@
 #File for running sensitivity analysis on Cluster 
-using Distributed
+using Pkg
+Pkg.activate("."); 
+Pkg.instantiate()
+
+using Distributed, SlurmClusterManager
 
 addprocs(SlurmManager())
 @everywhere println("hello from $(myid()):$(gethostname())")
@@ -17,7 +21,7 @@ end
     using CHANCE_C
     using LinearAlgebra
     using StatsBase
-    import GlobalSensitivityAnalysis as GSA
+    using Random
     using DataStructures
     using Distributions
     using FileIO
@@ -35,14 +39,15 @@ end
 
 ## Create wrapper of Simulator function to avoid specifying input data and hyperparameters every time
 @everywhere begin 
-    BaltSim(;slr::Bool, no_of_years::Int64, perc_growth::Float64, house_choice_mode::String, flood_coefficient::Float64, levee::Bool, 
-    breach::Bool, breach_null::Float64, risk_averse::Float64, flood_mem::Int64, fixed_effect::Float64, base_move::Float64, seed::Int64) = Simulator(default_df, balt_base, balt_levee;  
-    slr = slr, slr_scen = [3.03e-3,7.878e-3,2.3e-2], scenario = "Baseline", intervention = "Baseline", start_year = 2018, no_of_years = no_of_years,  
+    @everywhere BaltSim(;slr_scen::String, no_of_years::Int64, perc_growth::Float64, house_choice_mode::String, flood_coefficient::Float64, levee::Bool, 
+    breach::Bool, breach_null::Float64, risk_averse::Float64, flood_mem::Int64, fixed_effect::Float64, base_move::Float64, seed::Int64) = Simulator(default_df, balt_base, balt_levee; 
+    slr_scen = slr_scen, slr_rate = [3.03e-3,7.878e-3,2.3e-2], scenario = "Baseline", intervention = "Baseline", start_year = 2018, no_of_years = no_of_years, 
     pop_growth_perc = perc_growth, house_choice_mode = house_choice_mode, flood_coefficient = flood_coefficient, levee = levee, breach = breach, 
     breach_null = breach_null, risk_averse = risk_averse, flood_mem = flood_mem, fixed_effect = fixed_effect, perc_move = base_move, seed = seed)
 
 
     #Define Function to calculate return period from return level
+    surge_event = collect(range(0.75,4.0, step=0.25))
     function GEV_rp(z_p, mu = μ, sig = σ, xi = ξ)
         y_p = 1 + (xi * ((z_p - mu)/sig))
         rp = -exp(-y_p^(-1/xi)) + 1
@@ -59,8 +64,8 @@ end
 
 
 #Set seed range
-seed_range = range(1000, 1999, step = 1)
-surge_event = collect(range(0.75,4.0, step=0.25))
+seed_range = range(1000, 1999, step = 4)
+
 
 #create function to run model using samples
 function flood_scen(param_values::AbstractArray{<:Number, N}) where N
@@ -87,7 +92,7 @@ function flood_scen(param_values::AbstractArray{<:Number, N}) where N
     RSI = log.(sum(Matrix(lev_dam) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam) .* surge_rp, dims = 1))
     Y[1,1] = mean(RSI)
     Agents.ProgressMeter.next!(progress)
-    """
+    
     Agents.ProgressMeter.progress_map(2:numruns; progress) do i
          #Select correct event dictionary based on breach occurrence in realization
         
@@ -106,22 +111,33 @@ function flood_scen(param_values::AbstractArray{<:Number, N}) where N
         RSI = log.(sum(Matrix(lev_dam) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam) .* surge_rp, dims = 1))
         Y[i,1] = mean(RSI)
     end
-    """
+    
     return Y
 end
 
+##Create Parameter combinations
+seed = Random.seed!(1)
 
-#define data
-data = GSA.SobolData(
-    params = OrderedDict(:risk_averse => Uniform(0,1), :breach => Binomial(1,0.5), :pop_growth => Uniform(0,0.02),
-    :mem => Categorical([(1/12) for _ in 1:12]), :fixed_effect => Uniform(0.0, 0.1), :slr => Categorical([(1/3) for _ in 1:3]),),
-    N = 1000,
-)
+#Define Parameter ranges
+allcombinations(v...) = vec(collect(Iterators.product(v...)))
 
-samples = GSA.sample(data)
+params = OrderedDict(:risk_averse => [0.0, 0.2, 0.4, 0.6, 0.8], :breach => [1.0, 0.0], :pop_growth => [0.0, 0.005, 0.01, 0.015],
+    :mem => [5.0, 10.0, 15.0], :fixed_effect => [0.0, 0.02, 0.04, 0.06, 0.08], :slr => [1.0, 2.0, 3.0],)
 
-#For flood memory
-samples[:,4] .+= 3.0
+
+param_combs = allcombinations(getindex.(Ref(params), params.keys)...)
+
+samples = [tup[k] for tup in param_combs, k in 1:6]
+#samples = GSA.sample(data)
+for i in 1:size(samples)[1]
+    averse_dist = Uniform(samples[i,1], samples[i,1] + 0.2) #r_a
+    growth_dist = Uniform(samples[i,3], samples[i,3] + 0.005) #pop_growth
+    fe_dist = Uniform(samples[i,5], samples[i,5] + 0.02) #fixed_effect
+
+    samples[i,1] = rand(seed, averse_dist)
+    samples[i,3] = rand(seed, growth_dist)
+    samples[i,5] = rand(seed, fe_dist)
+end
 
 
 #run model
@@ -130,8 +146,8 @@ Y = flood_scen(samples)
 ## Save results
 #Create Dataframe to store values
 
-params = data.params.keys
+params = params.keys
 push!(params, :RSI)
 
 factor_samples = DataFrame(hcat(samples,Y), params)
-CSV.write(joinpath(@__DIR__, "workflow/CHANCE_C/output/SA_Results/scen_disc_table.csv"), factor_samples)
+CSV.write(joinpath(@__DIR__, "SA_Results/scen_disc_table.csv"), factor_samples)

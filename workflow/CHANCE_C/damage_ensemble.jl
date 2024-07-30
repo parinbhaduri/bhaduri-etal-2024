@@ -8,7 +8,7 @@ Pkg.instantiate()
 include(joinpath(@__DIR__, "src/config_parallel.jl"))
 
 #Define input parameters
-slr_scen = "medium"
+slr_scen = "high"
 no_of_years = 50
 perc_growth = 0.01
 house_choice_mode = "flood_mem_utility"
@@ -28,9 +28,11 @@ surge_breach = Dict(zip(surge_event,breach_prob))
 
 #For Parallel:
 seed_range = range(1000, 1999, step = 1)
+seed_range = range(1000, 1999, step = 1)
 
 
 
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
 base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
@@ -49,6 +51,5 @@ base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_s
 CSV.write(joinpath(@__DIR__,"dataframes/base_event_low_RA.csv"), base_damage)
 CSV.write(joinpath(@__DIR__,"dataframes/levee_event_low_RA.csv"), levee_damage)
 
-rmprocs(workers())
 
 
