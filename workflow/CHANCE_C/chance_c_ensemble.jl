@@ -16,14 +16,14 @@ mdata = [flood_scenario, flood_record, total_fld_area]
 #Define model parameters or parameter ranges for ABM initialization
 params = Dict(
     :no_of_years => 50,
-    :scen => ["low", "high"],
+    :slr_scen => ["low", "medium", "high"],
     :perc_growth => 0.01,
     :house_choice_mode => "flood_mem_utility",
     :flood_coefficient => -10.0^5,
     :risk_averse => [0.3, 0.7],
     :levee => [false, true],
     :breach => true,
-    :breach_null => 0.45,
+    :breach_null => 0.4,
     :flood_mem => 10,
     :fixed_effect => 0.0,
     :base_move => 0.025,  

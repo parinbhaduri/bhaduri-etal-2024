@@ -38,7 +38,7 @@ params_levee = Dict(
     :fe => 0.0,
     :prob_move => 0.025,  
     :pop_growth => 0.0,
-    :seed => collect(range(1000,2000)), 
+    :seed => collect(range(1000,1999)), 
 )
 ##Evolve models over different parameter combinations
 adf_levee, mdf_levee = paramscan(params_levee, flood_ABM; parallel = true, showprogress = true, adata, mdata, agent_step! = dummystep, model_step! = combine_step!, n = 50)

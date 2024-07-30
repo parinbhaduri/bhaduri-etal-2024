@@ -12,6 +12,9 @@ using FileIO
 base_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage.csv")))
 levee_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage.csv")))
 
+base_dam_250 = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage_250.csv")))
+levee_dam_250 = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage_250.csv")))
+
 event_size = collect(range(0.75, 4.0, step = 0.25))
 threshold = zeros(length(event_size))
 
@@ -38,6 +41,8 @@ CairoMakie.lines!(ax1, event_size, diff_med, color = "orange", linewidth = 2.5)
 CairoMakie.band!(ax1, event_size, diff_LB, diff_UB, color = ("orange", 0.35))
  
 CairoMakie.lines!(ax1, event_size, threshold, linestyle = :dash, color = "black", linewidth = 2)
+
+
 
 #Add 100-year event and Floodwall height
 CairoMakie.vlines!(ax1, [1.98, 2.804], color = ["green", "purple"], linewidth = 2.5)
