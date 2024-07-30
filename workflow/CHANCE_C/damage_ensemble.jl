@@ -8,7 +8,7 @@ Pkg.instantiate()
 include(joinpath(@__DIR__, "src/config_parallel.jl"))
 
 #Define input parameters
-slr_scen = "medium"
+slr_scen = "high"
 no_of_years = 50
 perc_growth = 0.01
 house_choice_mode = "flood_mem_utility"
@@ -27,36 +27,29 @@ breach_prob = levee_breach.(m_to_ft.(surge_event); n_null = breach_null)
 surge_breach = Dict(zip(surge_event,breach_prob))
 
 #For Parallel:
-seed_range = range(1000, 1999, step = 4)
+seed_range = range(1000, 1999, step = 1)
+seed_range = range(1000, 1999, step = 1)
 
 
 
-base_damage_250, levee_damage_250 = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
 #Save Dataframes
-CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage_250.csv"), base_damage_250)
-CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage_250.csv"), levee_damage_250)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage.csv"), levee_damage)
 
 
-## Look at alternative benchmark scenario (no breaching, no pop growth)
-breach = false
-perc_growth = 0.0
-fixed_effect = 0.0
+## Look at alternative benchmark scenario (low RA)
+risk_averse = 0.7
 
-#Calculate breach probability for each surge event (All zero since considering overtopping only)
-surge_event = collect(range(0.75,4.0, step=0.25))
-breach_prob = zeros(length(surge_event))
-
-surge_overtop = Dict(zip(surge_event,breach_prob))
-
-base_damage, levee_damage = risk_damage(balt_ddf, surge_overtop, seed_range;slr=slr, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
     breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true)
 
 #Save Dataframes
-CSV.write(joinpath(@__DIR__,"dataframes/base_event_no_breach_no_growth.csv"), base_damage)
-CSV.write(joinpath(@__DIR__,"dataframes/levee_event_no_breach_no_growth.csv"), levee_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_low_RA.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_low_RA.csv"), levee_damage)
 
-rmprocs(workers())
 
 
