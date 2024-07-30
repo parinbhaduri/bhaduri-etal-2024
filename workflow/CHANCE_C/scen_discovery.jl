@@ -65,7 +65,7 @@ end
 
 
 #Set seed range
-seed_range = range(1000, 1999, step = 1)
+seed_range = range(1000, 1999, step = 4)
 
 #create function to run model using samples
 function flood_scen(param_values::AbstractArray{<:Number, N}) where N
