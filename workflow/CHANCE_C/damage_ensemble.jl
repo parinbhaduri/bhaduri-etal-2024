@@ -8,7 +8,7 @@ Pkg.instantiate()
 include(joinpath(@__DIR__, "src/config_parallel.jl"))
 
 #Define input parameters
-slr_scen = "high"
+slr_scen = "medium"
 no_of_years = 50
 perc_growth = 0.01
 house_choice_mode = "flood_mem_utility"

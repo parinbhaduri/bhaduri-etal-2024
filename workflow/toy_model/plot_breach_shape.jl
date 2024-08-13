@@ -7,6 +7,7 @@ Pkg.instantiate()
 
 using CSV, DataFrames
 using CairoMakie
+using ColorSchemes
 using FileIO
 
 ## Read in dataframes
@@ -37,30 +38,30 @@ linkyaxes!(ax1, ax3)
 #gb = gbc[1,1] = GridLayout()
 #gc = gbc[1,1] = GridLayout()
 
-
+palette = ColorSchemes.okabe_ito
 #Panel A
-CairoMakie.lines!(ax1, ret_per, occ_med.median, color = "orange", linewidth = 2.5)
+CairoMakie.lines!(ax1, ret_per, occ_med.median, color = palette[1], linewidth = 2.5)
 #, label = false)
 
-CairoMakie.band!(ax1, ret_per, occ_med.LB, occ_med.RB, color = ("orange", 0.35))
+CairoMakie.band!(ax1, ret_per, occ_med.LB, occ_med.RB, color = (palette[1], 0.35))
 
 CairoMakie.lines!(ax1, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 
 #Plots.title!("Stable (Low likelihood of breaching) ")
 
 #Panel B 
-CairoMakie.lines!(ax2, ret_per, occ_low.median, color = "blue", linewidth = 2.5,)# xscale = :log10,
+CairoMakie.lines!(ax2, ret_per, occ_low.median, color = palette[3], linewidth = 2.5,)# xscale = :log10,
 
-CairoMakie.band!(ax2, ret_per, occ_low.LB, occ_low.RB, color = ("blue", 0.35))
+CairoMakie.band!(ax2, ret_per, occ_low.LB, occ_low.RB, color = (palette[3], 0.35))
 
 CairoMakie.lines!(ax2, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 #Plots.title!("No Breaching")
 
 
 #Panel C
-CairoMakie.lines!(ax3, ret_per, occ_high.median, color = "red", linewidth = 2.5)
+CairoMakie.lines!(ax3, ret_per, occ_high.median, color = palette[6], linewidth = 2.5)
 
-CairoMakie.band!(ax3, ret_per, occ_high.LB, occ_high.RB, color = ("red", 0.35))
+CairoMakie.band!(ax3, ret_per, occ_high.LB, occ_high.RB, color = (palette[6], 0.35))
 
 CairoMakie.lines!(ax3, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 
