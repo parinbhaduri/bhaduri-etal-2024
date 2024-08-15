@@ -43,7 +43,7 @@ function pop_response(mdf, adf)
 
         max_high[row_index, 1:Int(length(pop_high))] = pop_high
     end
-
+    
     #lev_height = GEV_return(1/100)
     #extreme_runs = findall(base_max_depth.max_depth .> lev_height)
     ext_max = max_high#[extreme_runs,:]#, max_low[extreme_runs,:])
@@ -61,6 +61,7 @@ function pop_response(mdf, adf)
     
 
     return mem_cat, max_val
+    
 end
 
 """
@@ -78,12 +79,12 @@ fig = Figure(size = (1000, 1000))
 ga = fig[1, 1:2] = GridLayout()
 gb = fig[2, 1:2] = GridLayout()
 
-ax1 = Axis(ga[1, 1], ylabel = "Change in Population (count)", xlabel = "Time Since Major Flood (years)", title = "a. Floodplain Population Response after Major Flood Event in Baseline Scenario",
+ax1 = Axis(ga[1, 1], ylabel = "Change in Population (count)", xlabel = "Time Since Major Flood (years)", title = "a. Floodplain Population Response after Major Flood Event in No Levee Scenario",
 limits = ((0,13), nothing), xgridvisible = false)
 hidespines!(ax1, :t, :r)
 
-ax2 = Axis(gb[1, 1], ylabel = "Difference in Population (count)", xlabel = "Model Timestep (year)", title = "b. Difference in Floodplain Population between Levee and Baseline Scenario", 
-limits = ((0,50), nothing), xgridvisible = false)
+ax2 = Axis(gb[1, 1], ylabel = "Difference in Population (count)", xlabel = "Model Timestep (year)", title = "b. Difference in Floodplain Population between Levee and No Levee Scenario", 
+limits = ((0,50), (nothing, 400)), xgridvisible = false)
 hidespines!(ax2, :t, :r)
 
 
@@ -91,16 +92,17 @@ palette = ColorSchemes.okabe_ito
 
 #Plot Change in Population from year to year after Major Flood Event
 cat_high, pop_change_high = pop_response(mdf_base, adf_base_high)
+
 cat_low, pop_change_low = pop_response(mdf_base, adf_base_low)
 
 dodge = Int.(vcat(ones(length(cat_high)),ones(length(cat_low)) .+ 1))
 
-CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[2] : palette[1], dodge), show_outliers = false)
+CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[1] : palette[2], dodge), show_outliers = false)
 
 #Create Legend
-elem_1 = [PolyElement(color = palette[2])]
+elem_1 = [PolyElement(color = palette[1])]
 
-elem_2 = [PolyElement(color = palette[1])]
+elem_2 = [PolyElement(color = palette[2])]
 
 axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :rb, orientation = :horizontal, framevisible = false)
 #CairoMakie.lines!(ax1, collect(0:15), vec(resp_med), color = "orange", linewidth = 2.5)
@@ -109,15 +111,15 @@ axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], 
 #airoMakie.band!(ax1, collect(0:15), resp_quantiles[1,:], resp_quantiles[2,:], color = ("orange", 0.35))
 
 #Plot Difference in floodplain population between levee and no levee scenario
-pop_diff_high = transpose(reshape(adf_levee_high.count_floodplain_fam, (51,1001))) .-  transpose(reshape(adf_base_high.count_floodplain_fam, (51,1001)))
-pop_diff_low = transpose(reshape(adf_levee_low.count_floodplain_fam, (51,1001))) .- transpose(reshape(adf_base_low.count_floodplain_fam, (51,1001)))
+pop_diff_high = transpose(reshape(adf_levee_high.count_floodplain_fam, (51,1000))) .-  transpose(reshape(adf_base_high.count_floodplain_fam, (51,1000)))
+pop_diff_low = transpose(reshape(adf_levee_low.count_floodplain_fam, (51,1000))) .- transpose(reshape(adf_base_low.count_floodplain_fam, (51,1000)))
 
-CairoMakie.series!(ax2, pop_diff_high, solid_color = (palette[2], 0.25), linewidth = 1, overdraw = true, transparency = true)
-CairoMakie.series!(ax2, pop_diff_low, solid_color = (palette[1], 0.25), linewidth = 1, overdraw = true, transparency = true)
+CairoMakie.series!(ax2, pop_diff_high, solid_color = (palette[1], 0.25), linewidth = 1, overdraw = true, transparency = true)
+CairoMakie.series!(ax2, pop_diff_low, solid_color = (palette[2], 0.25), linewidth = 1, overdraw = true, transparency = true)
 #Create Legend
-elem_1 = [LineElement(color = palette[2], linestyle = nothing)]
+elem_1 = [LineElement(color = palette[1], linestyle = nothing)]
 
-elem_2 = [LineElement(color = palette[1], linestyle = nothing)]
+elem_2 = [LineElement(color = palette[2], linestyle = nothing)]
 
 axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal, framevisible = false)
 
