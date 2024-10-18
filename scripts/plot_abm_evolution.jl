@@ -8,25 +8,25 @@ using CairoMakie
 using ColorSchemes
 
 #import GEV functions from toy model
-include(joinpath(@__DIR__, "src/toy_ABM_functions.jl")) #for GEV_return function
+include(joinpath(dirname(@__DIR__), "workflow/toy_model/src/toy_ABM_functions.jl")) #for GEV_return function
 
 #Read in ABM ensemble evolution data
-adf_base = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/adf_base.csv")))
+adf_base = DataFrame(CSV.File(joinpath(dirname(@__DIR__), "workflow/toy_model/dataframes/adf_base.csv")))
 #Separate high RA and low RA
 adf_base_high = filter(:risk_averse => isequal(0.3), adf_base)
 adf_base_low = filter(:risk_averse => isequal(0.7), adf_base)
 
-adf_levee = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/adf_levee.csv")))
+adf_levee = DataFrame(CSV.File(joinpath(dirname(@__DIR__), "workflow/toy_model/dataframes/adf_levee.csv")))
 #Separate high RA and low RA
 adf_levee_high = filter(:risk_averse => isequal(0.3), adf_levee)
 adf_levee_low = filter(:risk_averse => isequal(0.7), adf_levee)
 
 flood_100 = [GEV_return(1/100) for _ in 1:51]
 
-mdf_base = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/mdf_base.csv")))
+mdf_base = DataFrame(CSV.File(joinpath(dirname(@__DIR__), "workflow/toy_model/dataframes/mdf_base.csv")))
 mdf_base = subset(mdf_base, :risk_averse => ByRow(isequal(0.3))) #Just grab one flood record ensemble
 
-mdf_levee = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/mdf_levee.csv")))
+mdf_levee = DataFrame(CSV.File(joinpath(dirname(@__DIR__), "workflow/toy_model/dataframes/mdf_levee.csv")))
 mdf_levee = subset(mdf_levee, :risk_averse => ByRow(isequal(0.3)))
 
 function pop_response(mdf, adf)
@@ -75,11 +75,11 @@ pop_change = [(max_response.count_floodplain_fam[i] .- max_response.count_floodp
 """
 
 ##Plot Baseline Results
-fig = Figure(size = (1000, 1000))
+fig = Figure(size = (1000, 1000), fontsize = 18, pt_per_unit = 1, figure_padding = 20)
 ga = fig[1, 1:2] = GridLayout()
 gb = fig[2, 1:2] = GridLayout()
 
-ax1 = Axis(ga[1, 1], ylabel = "Change in Population (count)", xlabel = "Time Since Major Flood (years)", title = "a. Floodplain Population Response after Major Flood Event in No Levee Scenario",
+ax1 = Axis(ga[1, 1], ylabel = "Change in Population (count)", xlabel = "Time Since Major Flood (years)", title = " a. Floodplain Population Response after Major Flood Event in No Levee Scenario",
 limits = ((0,13), nothing), xgridvisible = false)
 hidespines!(ax1, :t, :r)
 
@@ -98,13 +98,16 @@ cat_low, pop_change_low = pop_response(mdf_base, adf_base_low)
 dodge = Int.(vcat(ones(length(cat_high)),ones(length(cat_low)) .+ 1))
 
 CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[1] : palette[2], dodge), show_outliers = false)
+CairoMakie.vlines!(ax1, 9.6, color = :black, linestyle = :dash) #Flood Memory line
+text!(ax1, 9.7, -40, text=rich("Flood Memory Duration", font = :italic), align = (:left, :center), fontsize = 12)
 
 #Create Legend
 elem_1 = [PolyElement(color = palette[1])]
-
 elem_2 = [PolyElement(color = palette[2])]
 
-axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :rb, orientation = :horizontal, framevisible = false)
+
+axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :cb,
+ orientation = :horizontal, framevisible = false)
 #CairoMakie.lines!(ax1, collect(0:15), vec(resp_med), color = "orange", linewidth = 2.5)
 #, label = false)
 
@@ -121,7 +124,8 @@ elem_1 = [LineElement(color = palette[1], linestyle = nothing)]
 
 elem_2 = [LineElement(color = palette[2], linestyle = nothing)]
 
-axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal, framevisible = false)
+axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal,
+ framevisible = false)
 
 display(fig)
 

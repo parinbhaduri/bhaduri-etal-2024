@@ -5,6 +5,7 @@ Pkg.instantiate()
 
 using Extremes
 using Plots
+using Random
 
 dat_annmax = DataFrame(CSV.File(joinpath(dirname(pwd()), "baltimore-data/model_inputs", "balt_tide.csv")))
 
@@ -34,7 +35,7 @@ ret_level_plt = plot(return_periods, return_levels, xticks = 0:100:1000, yticks 
 xaxis!(ret_level_plt, "Return period (years)")
 yaxis!(ret_level_plt, "Return level (meters)")
 
-savefig(ret_level_plt, "ret_level_plt.png")
+savefig(ret_level_plt, joinpath(pwd(),"ret_level_plt.png"))
 
 ##Create histogram to see what bins GEV samples would fill
 GEV_d = GeneralizedExtremeValue(location(fm)[1], Extremes.scale(fm)[1], shape(fm)[1])
@@ -58,18 +59,18 @@ function GEV_rp(z_p, mu = μ, sig = σ, xi = ξ)
 end
 
 gev_rng = MersenneTwister(1897)
-flood_record = [GEV_event(gev_rng) for _ in 1:1000]
+flood_rec = [GEV_event(gev_rng) for _ in 1:1000]
 # Sea Level Rise
 #high scenario of SL change projection for 2031 is 0.28m and 2.57m for 2130 (NOAA)
 high_slr = repeat([0.023 * i for i in 1:50], 20)
-slr_record = flood_record .+ high_slr
+slr_record = flood_rec .+ high_slr
 
 #Count number of occurences of each surge event  
-surge_freq = hcat([[i, count(==(i), round_step.(flood_record,0.25))] for i in unique(round_step.(flood_record,0.25))]...)
+surge_freq = hcat([[i, count(==(i), round_step.(flood_rec,0.25))] for i in unique(round_step.(flood_rec,0.25))]...)
 surge_freq_slr = hcat([[i, count(==(i), round_step.(slr_record,0.25))] for i in unique(round_step.(slr_record,0.25))]...)
 
-surge_interval = bar(surge_freq[1,:], surge_freq[2,:], alpha = 0.5, label = "Surge", legend = :outerright, dpi = 300)
-bar!(surge_freq_slr[1,:], surge_freq_slr[2,:], alpha = 0.5, label = "Surge w/ SLR")
+surge_interval = bar(surge_freq[1,:], surge_freq[2,:], alpha = 0.5, label = "Surge", legend = :outerbottom, legendcolumns = 2, dpi = 300)
+bar!(surge_freq_slr[1,:], surge_freq_slr[2,:], alpha = 0.5, label = "Surge w/ High SLR")
 #title!("Surge Frequencies at 0.25m intervals")
 #savefig(surge_interval, "surge_interval.png")
 
@@ -79,4 +80,4 @@ vline!([returnlevel(fm, 100).value[]], lw = 2.5, label = "100-Year Event")
 vline!([2.804], lw = 2.5, label = "Sea Wall Height")
 #title!("Surge Frequencies at 0.25m intervals")
 
-savefig(surge_interval, "surge_interval.png")
+savefig(surge_interval, joinpath(pwd(),"surge_interval.png"))

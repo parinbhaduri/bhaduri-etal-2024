@@ -7,4 +7,4 @@
 #SBATCH --exclusive
 
 # Run the Julia code
-julia +1.7 factor_map_cluster.jl
+julia +1.7 workflow/toy_model/SA_cluster.jl

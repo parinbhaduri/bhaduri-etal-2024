@@ -1,4 +1,4 @@
-### Compares risk shifting properties among variations in levee breach curve shape
+### Compares risk shifting properties among variations in levee breach curve shape in Idealized Experiment
 
 #activate project environment
 using Pkg
@@ -20,16 +20,16 @@ threshold = zeros(length(ret_per))
 
 ## Plot results
 #Create backdrop
-fig = Figure(size = (900,600), fontsize = 16, pt_per_unit = 1, figure_padding = 18)
+fig = Figure(size = (900,600), fontsize = 18, pt_per_unit = 1, figure_padding = 18)
 
 ax1 = Axis(fig[1, 1:2], ylabel = "Difference in Occupied Exposure", xlabel = "Return Period (years)", xscale = log10,
- xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "a. Comparing Flood Impact between Levee and Baseline Scenario")
+ xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "Comparing Flood Impact between Levee and No Levee Scenario")
 
 ax2 = Axis(fig[2, 1], ylabel = "Difference in Occupied Exposure", xlabel = "Return Period (years)", xscale = log10,
- xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "b. No Levee Breach Failure")
+ xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "No Levee Breach Failure")
 
 ax3 = Axis(fig[2, 2], xlabel = "Return Period (years)", xscale = log10,
- xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "c. High Levee Breach Likelihood")
+ xticks = ([10,100,1000], string.([10,100,1000])), limits = ((10,1000), nothing), xgridvisible = false, titlealign = :center, title = "High Levee Breach Likelihood")
 
 linkyaxes!(ax1, ax3)
 #Create grid layout
@@ -38,30 +38,30 @@ linkyaxes!(ax1, ax3)
 #gb = gbc[1,1] = GridLayout()
 #gc = gbc[1,1] = GridLayout()
 
-palette = ColorSchemes.okabe_ito
+Palette = ColorSchemes.okabe_ito
 #Panel A
-CairoMakie.lines!(ax1, ret_per, occ_med.median, color = palette[1], linewidth = 2.5)
+CairoMakie.lines!(ax1, ret_per, occ_med.median, color = Palette[1], linewidth = 2.5)
 #, label = false)
 
-CairoMakie.band!(ax1, ret_per, occ_med.LB, occ_med.RB, color = (palette[1], 0.35))
+CairoMakie.band!(ax1, ret_per, occ_med.LB, occ_med.RB, color = (Palette[1], 0.35))
 
 CairoMakie.lines!(ax1, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 
 #Plots.title!("Stable (Low likelihood of breaching) ")
 
 #Panel B 
-CairoMakie.lines!(ax2, ret_per, occ_low.median, color = palette[3], linewidth = 2.5,)# xscale = :log10,
+CairoMakie.lines!(ax2, ret_per, occ_low.median, color = Palette[3], linewidth = 2.5,)# xscale = :log10,
 
-CairoMakie.band!(ax2, ret_per, occ_low.LB, occ_low.RB, color = (palette[3], 0.35))
+CairoMakie.band!(ax2, ret_per, occ_low.LB, occ_low.RB, color = (Palette[3], 0.35))
 
 CairoMakie.lines!(ax2, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 #Plots.title!("No Breaching")
 
 
 #Panel C
-CairoMakie.lines!(ax3, ret_per, occ_high.median, color = palette[6], linewidth = 2.5)
+CairoMakie.lines!(ax3, ret_per, occ_high.median, color = Palette[6], linewidth = 2.5)
 
-CairoMakie.band!(ax3, ret_per, occ_high.LB, occ_high.RB, color = (palette[6], 0.35))
+CairoMakie.band!(ax3, ret_per, occ_high.LB, occ_high.RB, color = (Palette[6], 0.35))
 
 CairoMakie.lines!(ax3, ret_per, threshold, linestyle = :dash, color = "black", linewidth = 2)
 

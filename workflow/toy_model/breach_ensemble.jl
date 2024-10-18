@@ -19,6 +19,10 @@ CSV.write(joinpath(@__DIR__,"dataframes/breach_none.csv"), occ_none)
 occ_base = risk_shift(Elevation, seed_range; breach_null = 0.4, parallel = true, showprogress = true)
 CSV.write(joinpath(@__DIR__,"dataframes/breach_base.csv"), occ_base)
 
+#base conditions, low Risk Aversion
+occ_base_low = risk_shift(Elevation, seed_range; breach_null = 0.4, risk_averse = 0.7, parallel = true, showprogress = true)
+CSV.write(joinpath(@__DIR__,"dataframes/breach_base_RA_low.csv"), occ_base_low)
+
 #high likelihood of breaching
 occ_high = risk_shift(Elevation, seed_range; breach_null = 0.5, parallel = true, showprogress = true)
 CSV.write(joinpath(@__DIR__,"dataframes/breach_high.csv"), occ_high)
