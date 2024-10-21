@@ -10,7 +10,6 @@ using Distributions
 using DataFrames, CSV
 using FileIO
 
-using CairoMakie
 
 #Read in Model Runs
 data = DataFrame(CSV.File(joinpath(@__DIR__,"SA_Results/scen_disc_table.csv")))
@@ -29,12 +28,24 @@ features = select(data_new, Not(:RSI))
 
 mach = machine(model, features, labels) |> MLJ.fit!
 
-evaluate(model, features, labels, resampling=CV(nfolds=10, shuffle=true, rng=123), measure=[RootMeanSquaredError()])
-
 factor_import = stack(DataFrame(feature_importances(mach)))
 
+evaluate(model, features, labels, resampling=CV(nfolds=10, shuffle=true, rng=123), measure=[RootMeanSquaredError()])
+fitted_params(mach).tree
+
+CSV.write(joinpath(@__DIR__, "dataframes/SD_feature_importance.csv"), factor_import)
 
 
+
+
+
+
+
+
+
+
+
+"""
 fig = Figure(size = (1800,1080), fontsize = 18, pt_per_unit = 1, figure_padding = 20)
 
 ax = Axis(fig[1,1], yticks = (1:6, reverse(["Risk Averse", "Pop. Growth", "Expectation Effect", "SLR", "Breach", "Flood Memory"])),                
@@ -47,16 +58,6 @@ display(fig)
 CairoMakie.save(joinpath(pwd(),"figures/SD_feature_importance.png"), fig)
 
 
-
-fitted_params(mach).tree
-
-
-
-
-
-
-
-"""
 ##Tree Selection
 # run 10-fold cross validation, returns array of coefficients of determination (R^2)
 

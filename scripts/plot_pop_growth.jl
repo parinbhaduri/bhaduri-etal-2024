@@ -9,9 +9,9 @@ using ColorSchemes
 using FileIO
 
 #Read in Data
-occ_base = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_base.csv")))
-occ_pop_2 = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/pop_growth_2.csv")))
-occ_pop_5 = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/pop_growth_5.csv")))
+occ_base = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/dataframes/breach_base.csv")))
+occ_pop_2 = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/dataframes/pop_growth_2.csv")))
+occ_pop_5 = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/dataframes/pop_growth_5.csv")))
 
 ret_per = range(10, 1000, length=100)
 threshold = zeros(length(ret_per))

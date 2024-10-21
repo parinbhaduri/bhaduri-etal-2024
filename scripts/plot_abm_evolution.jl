@@ -101,13 +101,13 @@ title = "b. Difference in Floodplain Population between Levee and No Levee Scena
 limits = ((0,50), (nothing, 400)), xgridvisible = false)
 hidespines!(ax2, :t, :r)
 
+
 ax3 = Axis(gc[1, 1], ylabel = rich("Difference in Population (count)"; font = :bold), xlabel = rich("Model Timestep (year)"; font = :bold),
 title = "c. Difference in Floodplain Population between Levee and No Levee Scenario (Baltimore)", titlesize = 18, 
  xgridvisible = false, yticks = ([-5e3, 0, 5e3, 1e4], ["-5000","0","5000","10000"]), limits = ((0,50), (nothing, nothing)))
 hidespines!(ax3, :t, :r)
 
-
-palette = ColorSchemes.okabe_ito
+Palette = ColorSchemes.okabe_ito
 
 #Plot Change in Population from year to year after Major Flood Event
 cat_high, pop_change_high = pop_response(mdf_base, adf_base_high)
@@ -116,13 +116,13 @@ cat_low, pop_change_low = pop_response(mdf_base, adf_base_low)
 
 dodge = Int.(vcat(ones(length(cat_high)),ones(length(cat_low)) .+ 1))
 
-CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? palette[1] : palette[2], dodge), show_outliers = false)
+CairoMakie.boxplot!(ax1, vcat(cat_high, cat_low), vcat(pop_change_high, pop_change_low), dodge = dodge, color = map(d->d==1 ? Palette[1] : Palette[2], dodge), show_outliers = false)
 CairoMakie.vlines!(ax1, 9.6, color = :black, linestyle = :dash) #Flood Memory line
 text!(ax1, 9.7, -40, text=rich("Flood Memory Duration", font = :italic), align = (:left, :center), fontsize = 12)
 
 #Create Legend
-elem_1 = [PolyElement(color = palette[1])]
-elem_2 = [PolyElement(color = palette[2])]
+elem_1 = [PolyElement(color = Palette[1])]
+elem_2 = [PolyElement(color = Palette[2])]
 
 
 axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :cb,
@@ -132,31 +132,32 @@ axislegend(ax1, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], 
 
 #airoMakie.band!(ax1, collect(0:15), resp_quantiles[1,:], resp_quantiles[2,:], color = ("orange", 0.35))
 
-#Plot Difference in floodplain population between levee and no levee scenario
+#Plot Difference in floodplain population between levee and no levee scenario (Idealized)
 pop_diff_high = transpose(reshape(adf_levee_high.count_floodplain_fam, (51,1000))) .-  transpose(reshape(adf_base_high.count_floodplain_fam, (51,1000)))
 pop_diff_low = transpose(reshape(adf_levee_low.count_floodplain_fam, (51,1000))) .- transpose(reshape(adf_base_low.count_floodplain_fam, (51,1000)))
 
-CairoMakie.series!(ax2, pop_diff_high, solid_color = (palette[1], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
-CairoMakie.series!(ax2, pop_diff_low, solid_color = (palette[2], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
+CairoMakie.series!(ax2, pop_diff_high, solid_color = (Palette[1], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
+CairoMakie.series!(ax2, pop_diff_low, solid_color = (Palette[2], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
 #Create Legend
-elem_1 = [LineElement(color = palette[1], linestyle = nothing)]
+elem_1 = [LineElement(color = Palette[1], linestyle = nothing)]
 
-elem_2 = [LineElement(color = palette[2], linestyle = nothing)]
+elem_2 = [LineElement(color = Palette[2], linestyle = nothing)]
 
 axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal,
  framevisible = false)
 
 
-#Plot Difference in floodplain population between levee and no levee scenario
+#Plot Difference in floodplain population between levee and no levee scenario (Baltimore)
+
 balt_diff_high = transpose(reshape(balt_levee_high.sum_population_f_c_bgs, (51,1000))) .-  transpose(reshape(balt_base_high.sum_population_f_c_bgs, (51,1000)))
 balt_diff_low = transpose(reshape(balt_levee_low.sum_population_f_c_bgs, (51,1000))) .- transpose(reshape(balt_base_low.sum_population_f_c_bgs, (51,1000)))
 
-CairoMakie.series!(ax3, balt_diff_high, solid_color = (palette[1], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
-CairoMakie.series!(ax3, balt_diff_low, solid_color = (palette[2], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
+CairoMakie.series!(ax3, balt_diff_high, solid_color = (Palette[1], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
+CairoMakie.series!(ax3, balt_diff_low, solid_color = (Palette[2], 0.25), linewidth = 1)#, overdraw = true, transparency = true)
 #Create Legend
-elem_1 = [LineElement(color = palette[1], linestyle = nothing)]
+elem_1 = [LineElement(color = Palette[1], linestyle = nothing)]
 
-elem_2 = [LineElement(color = palette[2], linestyle = nothing)]
+elem_2 = [LineElement(color = Palette[2], linestyle = nothing)]
 
 axislegend(ax3, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal,
  framevisible = false)
@@ -164,3 +165,26 @@ axislegend(ax3, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], 
 display(fig)
 
 CairoMakie.save(joinpath(pwd(),"figures/abm_response.png"), fig)
+
+
+"""
+ax3 = Axis(gc[1, 1], xlabel = rich("Difference in Population (count)"; font = :bold), ylabel = rich("Count"; font = :bold),
+ title = "c. Difference in Final Floodplain Population between Levee and No Levee Scenario (Baltimore)", titlesize = 16, 
+  ygridvisible = false, xticks = ([-5e3, 0, 5e3, 1e4], ["-5000","0","5000","10000"]))
+hidespines!(ax3, :t, :r)
+"""
+
+"""
+#Alternative Plot ***
+balt_base_final_high = filter(row -> (row.step == 50), balt_base_high)
+balt_levee_final_high = filter(row -> (row.step == 50), balt_levee_high)
+
+balt_base_final_low = filter(row -> (row.step == 50), balt_base_low)
+balt_levee_final_low = filter(row -> (row.step == 50), balt_levee_low)
+
+balt_diff_high = balt_levee_final_high.sum_population_f_c_bgs .-  balt_base_final_high.sum_population_f_c_bgs
+balt_diff_low = balt_levee_final_low.sum_population_f_c_bgs .-  balt_base_final_low.sum_population_f_c_bgs
+
+CairoMakie.hist!(ax3, balt_diff_high, color = (Palette[1], 0.75))
+CairoMakie.hist!(ax3, balt_diff_low, color = (Palette[2], 0.75), offset = 1)
+"""
