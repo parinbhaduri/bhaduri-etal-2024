@@ -1,14 +1,15 @@
-_your zenodo badge here_
 
 # Bhaduri-etal_inprep
 
 **Uncertainty in Household Behavior Drives Large Variation in the Size of the Levee Effect**
 
- Parin Bhaduri `<sup>`1*`</sup>` , Adam B. Pollack `<sup>2</sup>`, James Yoon `<sup>3</sup>`, Pranab K. Roy Chowdhury `<sup>3</sup>`, Heng Wan `<sup>3</sup>`, David Judi `<sup>3</sup>`, Brent Daniel `<sup>3</sup>`, Vivek Srikrishnan `<sup>1</sup>`
+ Parin Bhaduri<sup>1*</sup>, Adam B. Pollack<sup>2</sup>, James Yoon<sup>3</sup>, Pranab K. Roy Chowdhury<sup>3</sup>, Heng Wan<sup>3</sup>, David Judi<sup>3</sup>, Brent Daniel<sup>3</sup>, Vivek Srikrishnan<sup>1</sup>
 
-`<sup>1</sup>` Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA
-`<sup>2</sup>` Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA
-`<sup>3</sup>` Pacific Northwest National Laboratory, Richland, Washington, USA
+<sup>1</sup> Department of Biological & Environmental Engineering, Cornell University, Ithaca, New York, USA
+
+<sup>2</sup> Thayer School of Engineering, Darthmouth College, Hanover, New Hampshire, USA
+
+<sup>3</sup> Pacific Northwest National Laboratory, Richland, Washington, USA
 
 \* corresponding author:  pbb62@cornell.edu
 
