@@ -20,6 +20,9 @@ balt_base_low = subset(adf, :levee => ByRow(isequal(false)), :slr_scen => ByRow(
 balt_levee_high = subset(adf, :levee => ByRow(isequal(true)), :slr_scen => ByRow(isequal("medium")), :risk_averse => ByRow(isequal(0.3)))
 balt_levee_low = subset(adf, :levee => ByRow(isequal(true)), :slr_scen => ByRow(isequal("medium")), :risk_averse => ByRow(isequal(0.7)))
 
+mdf = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/dataframes/mdf_balt_city.csv")))
+filter!(row -> !(row.step == 0), mdf) #Remove initial time step from each realization record
+mdf_balt = subset(mdf, :levee => ByRow(isequal(false)), :slr_scen => ByRow(isequal("medium")), :risk_averse => ByRow(isequal(0.3)))
 
 ##Idealized Experiment
 adf_base = DataFrame(CSV.File(joinpath(dirname(@__DIR__), "workflow/toy_model/dataframes/adf_base.csv")))
@@ -171,6 +174,41 @@ axislegend(ax3, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], 
 display(fig)
 
 CairoMakie.save(joinpath(pwd(),"figures/abm_response_final.png"), fig)
+
+
+
+### Additional Analysis
+#Check records with negative pop difference for CHANCE-C 
+neg_pop_high = findall(<(0), balt_diff_high)
+println("Percent of High RA Realizations with Negative Population Differences (CHANCE-C): $((length(neg_pop_high)/1000) * 100)%")
+
+neg_pop_low = findall(<(0), balt_diff_low)
+println("Percent of Low RA Realizations with Negative Population Differences (CHANCE-C): $((length(neg_pop_low)/1000) * 100)%")
+
+#Plot Associated Flood records
+seeds_high = balt_levee_final_high.seed[neg_pop_high]
+seeds_low = balt_levee_final_low.seed[neg_pop_low]
+
+floods_low = mdf_balt[[x in seeds_low for x in mdf_balt.seed],:]
+floods_high = mdf_balt[[x ∉ seeds_low for x in mdf_balt.seed],:]
+records_low = transpose(reshape(floods_low.flood_record, (50,length(seeds_low))))
+records_high = transpose(reshape(floods_high.flood_record, (50,1000 - length(seeds_low))))
+#records = transpose(reshape(mdf_balt.flood_record, (50,1000)))
+
+fig = Figure(size = (1000, 1000), fontsize = 16, pt_per_unit = 1, figure_padding = 20)
+
+ax = Axis(fig[1, 1], ylabel = rich("Surge Height (meters)"; font = :bold), xlabel = rich("Model Time Step (years)"; font = :bold),
+title = " a. Floodplain Population Response after Major Flood Event in No Levee Scenario (Idealized)", titlesize = 18,
+limits = (nothing, nothing), xgridvisible = false)
+hidespines!(ax, :t, :r)
+
+CairoMakie.series!(ax, records_low, solid_color = (:black, 0.25), linewidth = 1)
+display(fig)
+
+
+
+
+
 
 
 """

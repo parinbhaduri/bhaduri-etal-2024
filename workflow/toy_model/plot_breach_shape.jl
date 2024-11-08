@@ -72,5 +72,12 @@ display(fig)
 CairoMakie.save(joinpath(pwd(),"figures/risk_shift_breach.png"), fig)
 
 
-#Additional Analysis 
+##Additional Analysis 
+RSI_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_none_RSI.csv")))
+println("For Overtopping Only :\n Minimum RSI -> $(minimum(RSI_low.RSI)),\n Maximum RSI -> $(maximum(RSI_low.RSI)),\n Median RSI -> $(median(RSI_low.RSI))")
 
+RSI_base = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_base_RSI.csv")))
+println("For Base Breach:\n Minimum RSI -> $(minimum(RSI_base.RSI)),\n Maximum RSI -> $(maximum(RSI_base.RSI)),\n Median RSI -> $(median(RSI_base.RSI))")
+
+RSI_high = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/breach_high_RSI.csv")))
+println("For High Breach:\n Minimum RSI -> $(minimum(RSI_high.RSI)),\n Maximum RSI -> $(maximum(RSI_high.RSI)),\n Median RSI -> $(median(RSI_high.RSI))")

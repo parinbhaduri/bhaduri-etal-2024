@@ -14,26 +14,6 @@ using DecisionTree
 using Statistics
 
 
-#Read in Model Runs
-data = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/SA_Results/scen_disc_table.csv")))
-
-data_class = copy(data)
-data_class[!,:RSI] = [i > 0 ? "1" : "-1" for i in data_class[:,:RSI]]
-
-#
-#DecisionTreeClassifier = @load DecisionTreeClassifier pkg=DecisionTree
-model = DecisionTreeClassifier(max_depth=4)
-
-lab_class =  data_class[:,:RSI]
-features = Matrix(select(data_class, Not(:RSI)))
-
-fit!(model, features, lab_class)
-
-print_tree(model)
-
-
-
-
 ##Functions to visualize Tree
 import Base.convert
 function Base.convert(::Type{SimpleDiGraph},model::DecisionTree.DecisionTreeClassifier; maxdepth=depth(model))
@@ -148,14 +128,45 @@ function plot!(plt::PlotDecisionTree{<:Tuple{DecisionTreeClassifier}})
     
 end
 
-plt = graphplot(model)
+
+
+
+#Read in Model Runs
+data = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/SA_Results/scen_disc_table.csv")))
+
+data_class = copy(data)
+data_class[!,:RSI] = [i > 0 ? "1" : "-1" for i in data_class[:,:RSI]]
+
+neg_count = sum([i  == "-1" ? 1 : 0 for i in data_class[:,:RSI]]) #Count of -RSI values
+println("Proportion of RSI Outcomes with no risk transference: $((neg_count/1800) * 100)")
+
+#DecisionTreeClassifier = @load DecisionTreeClassifier pkg=DecisionTree
+model = DecisionTreeClassifier(max_depth=4)
+
+lab_class =  data_class[:,:RSI]
+features = Matrix(select(data_class, Not(:RSI)))
+
+fit!(model, features, lab_class)
+
+print_tree(model)
+plt = graphplot(model; textcolor = :black)
+GraphMakie.save(joinpath(pwd(),"figures/dec_tree.png"), plt)
+
+
+
+
+
+
 
 
 
 ext_data = copy(data)
+#filter!(row -> (row.RSI > 0), ext_data)
 thresh = quantile(ext_data[:, :RSI], 0.9) #90th Percentile
 #Calculate top 10% threshold
 ext_data[!,:RSI] = [i > thresh ? "1" : "-1" for i in ext_data[:,:RSI]]
+neg_ext_count = sum([i  == "1" ? 1 : 0 for i in ext_data[:,:RSI]]) #Count of extreme RSI values
+println("Proportion of RSI Outcomes with no risk transference: $((neg_ext_count/1800) * 100)")
 
 model_ext = DecisionTreeClassifier(max_depth=3)
 
@@ -166,6 +177,6 @@ fit!(model_ext, feat_ext, lab_ext)
 
 print_tree(model_ext)
 
-plt_ext = graphplot(model_ext)
+plt_ext = graphplot(model_ext; textcolor = :black)
 
 GraphMakie.save(joinpath(pwd(),"figures/dec_tree_extreme.png"), plt_ext)

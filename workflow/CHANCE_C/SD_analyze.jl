@@ -14,27 +14,26 @@ using FileIO
 #Read in Model Runs
 data = DataFrame(CSV.File(joinpath(@__DIR__,"SA_Results/scen_disc_table.csv")))
 ##Convert each Categorical Column into OrderedFactor SciType
-data_new = coerce(data, :breach => OrderedFactor,
+data_reg = coerce(data, :breach => OrderedFactor,
                         :mem => OrderedFactor,
                         :slr => OrderedFactor)
 
 
 DecisionTreeRegressor = @load DecisionTreeRegressor pkg=DecisionTree
-model = DecisionTreeRegressor(max_depth=4)
+model = DecisionTreeRegressor(max_depth=3)
 
 #labels = [i > 0 ? 1 : -1 for i in data_new[:,:RSI]]
-labels = data_new[:,:RSI]
-features = select(data_new, Not(:RSI))
+lab_reg = data_reg[:,:RSI]
+features = select(data_reg, Not(:RSI))
 
-mach = machine(model, features, labels) |> MLJ.fit!
+mach_reg = machine(model, features, lab_reg) |> MLJ.fit!
 
-factor_import = stack(DataFrame(feature_importances(mach)))
+factor_import = stack(DataFrame(feature_importances(mach_reg)))
 
-evaluate(model, features, labels, resampling=CV(nfolds=10, shuffle=true, rng=123), measure=[RootMeanSquaredError()])
-fitted_params(mach).tree
+evaluate(model, features, lab_reg, resampling=CV(nfolds=10, shuffle=true, rng=123), measure=[RootMeanSquaredError()])
+fitted_params(mach_reg).tree
 
 CSV.write(joinpath(@__DIR__, "dataframes/SD_feature_importance.csv"), factor_import)
-
 
 
 

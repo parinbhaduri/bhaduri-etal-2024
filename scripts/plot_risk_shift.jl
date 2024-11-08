@@ -4,6 +4,8 @@ Pkg.activate(".")
 Pkg.instantiate()
 
 using CSV, DataFrames
+using CHANCE_C
+using StatsBase
 using Statistics
 using CairoMakie
 using ColorSchemes
@@ -110,3 +112,36 @@ rowgap!(fig.layout, 2, 25)
 display(fig)
 
 CairoMakie.save(joinpath(pwd(),"figures/risk_transference.png"), fig)
+
+
+### Additional Analysis
+#Number of realizations with no risk transference
+no_rt_high = findall(<(0),diff_dam[14,:])
+println("Percent of High RA Realizations with No Risk Transference (CHANCE-C): $((length(no_rt_high)/1000) * 100)%")
+
+no_rt_low = findall(<(0),diff_dam_low[14,:])
+println("Percent of Low RA Realizations with No Risk Transference (CHANCE-C): $((length(no_rt_low)/1000) * 100)%")
+
+
+#Calculate Risk Shifting integral
+#Define Function to calculate return period from return level
+surge_event = collect(range(0.75,4.0, step=0.25))
+function GEV_rp(z_p, mu = μ, sig = σ, xi = ξ)
+    y_p = 1 + (xi * ((z_p - mu)/sig))
+    rp = -exp(-y_p^(-1/xi)) + 1
+    rp = round(rp, digits = 3)
+    return 1/rp
+end
+
+#Extract params from GEV distribution calibrated to Baltimore
+mu, sig, xi =  StatsBase.params(CHANCE_C.default_gev)
+
+#Calculate prob of occurrence of surge events from GEV distribution
+surge_rp = 1 ./ GEV_rp.(surge_event, Ref(mu), Ref(sig), Ref(xi))
+
+
+RSI_high = log.(sum(Matrix(levee_dam) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam) .* surge_rp, dims = 1))
+println("For High RA:\n Minimum RSI -> $(minimum(RSI_high)),\n Maximum RSI -> $(maximum(RSI_high)),\n Median RSI -> $(median(RSI_high))")
+
+RSI_low = log.(sum(Matrix(levee_dam_low) .* surge_rp, dims = 1) ./ sum(Matrix(base_dam_low) .* surge_rp, dims = 1))
+println("For Low RA:\n Minimum RSI -> $(minimum(RSI_low)),\n Maximum RSI -> $(maximum(RSI_low)),\n Median RSI -> $(median(RSI_low))")
