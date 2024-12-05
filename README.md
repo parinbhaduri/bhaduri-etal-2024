@@ -1,4 +1,4 @@
-
+![image](https://github.com/user-attachments/assets/92641840-327d-4a7a-9014-b059343d8663)
 # Bhaduri-etal_inprep
 
 **Uncertainty in Household Behavior Drives Large Variation in the Size of the Levee Effect**
