@@ -6,6 +6,7 @@ addprocs(12, exeflags="--project=$(Base.active_project())")
 
 @everywhere begin
     import GlobalSensitivityAnalysis as GSA
+    using GlobalSensitivity
     using DataStructures
     using SharedArrays
     using CSV
