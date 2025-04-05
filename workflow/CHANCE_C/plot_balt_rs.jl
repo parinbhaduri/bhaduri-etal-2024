@@ -10,11 +10,11 @@ using ColorSchemes
 using FileIO
 
 ## Read in dataframes for Baltimore Experiment. Calculate Risk Shifting 
-base_dam = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/dataframes/base_event_damage.csv")))
-levee_dam = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/dataframes/levee_event_damage.csv")))
+base_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_damage.csv")))
+levee_dam = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_damage.csv")))
 
-base_dam_low = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/dataframes/base_event_low_RA.csv")))
-levee_dam_low = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/dataframes/levee_event_low_RA.csv")))
+base_dam_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/base_event_low_RA.csv")))
+levee_dam_low = DataFrame(CSV.File(joinpath(@__DIR__,"dataframes/levee_event_low_RA.csv")))
 
 
 #Calculate Median and 95% Uncertainty Interval
@@ -42,9 +42,9 @@ thresh_balt = zeros(length(event_size))
 
 ## Plot results
 #Create backdrop
-fig = Figure(size = (900,600), fontsize = 18, pt_per_unit = 1, figure_padding = 18)
+fig = Figure(size = (900,600), fontsize = 22, pt_per_unit = 1, figure_padding = 18)
 
-ax1 = Axis(fig[2, 1:2], ylabel = rich(rich("Difference in Loss (\$ Thousands)\n";font=:bold),rich("[Levee - No Levee]")),
+ax1 = Axis(fig[1, 1], ylabel = rich(rich("Difference in Loss (\$ Thousands)\n";font=:bold),rich("[Levee - No Levee]")),
  xlabel = rich("Surge Event (m)";font=:bold), yticks = ([-2e4, 0, 2e4, 4e4], ["-20","0","20","40"]), limits = ((0.75,4), nothing),
  xgridvisible = false, titlealign = :center,
   title = "Comparing Flood Impact between Levee and No Levee Scenario")
@@ -84,3 +84,5 @@ axislegend(ax1, [[elem_1, elem_2], [elem_3, elem_4]] , [["High Risk Aversion", "
 position = :lt, orientation = :vertical, framevisible = false, labelsize = 18)
 
 display(fig)
+
+CairoMakie.save(joinpath(pwd(),"figures/balt_rs_pres.png"), fig)
