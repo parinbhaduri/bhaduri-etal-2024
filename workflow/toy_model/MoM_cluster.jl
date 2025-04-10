@@ -1,6 +1,6 @@
 ### Conduct Method Of Morris SA on toy model ###
 #File for running sensitivity analysis on Cluster 
-"""
+
 using Distributed
 
 num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
@@ -25,8 +25,8 @@ end
     using FileIO
     using Random
 end
-"""
 
+"""
 #activate project environment
 using Pkg
 Pkg.activate(".")
@@ -34,7 +34,7 @@ Pkg.instantiate()
 
 #Set up parallell processors; Include necessary functions from other scripts
 include(joinpath(@__DIR__, "src/parallel_setup.jl"))
-
+"""
 #Set a random seed
 Random.seed!(1)
 
@@ -54,7 +54,7 @@ end
 #create variable of vector bounds
 var_vec = [(0,1),(0.25,0.5),(0,0.05),(3,15),(0,0.1),(0.01,0.05)]
 #Run Method of Morris
-s = gsa(exp_shift, Morris(num_trajectory=10), var_vec)
+s = gsa(exp_shift, Morris(num_trajectory=100), var_vec)
 
 #Get mean and variance of EE 
 param_avg = abs.(s.means)
@@ -64,10 +64,8 @@ param_var = s.variances
 using DataFrames, CSV
 
 MoM_results = DataFrame(params=["Risk Averse", "Breach Likelihood", "Pop. Growth", "Flood Memory", "Expectation Effect", "Base Move Prob."],
-          exp_mean = param_avg,
-          exp_var = param_var
+          exp_mean = param_avg[1,:],
+          exp_var = param_var[1,:]
 )
 
-CSV.write(joinpath(@__DIR__, "workflow/toy_model/output/SA_Results/MoM_results_ideal_100.csv"), MoM_results)
-
-      
+CSV.write(joinpath(@__DIR__, "SA_Results/MoM_results_ideal_100.csv"), MoM_results)
