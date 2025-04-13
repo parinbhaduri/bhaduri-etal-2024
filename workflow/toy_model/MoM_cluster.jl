@@ -6,15 +6,19 @@ using Distributed
 num_cores = parse(Int,ENV["SLURM_TASKS_PER_NODE"])
 addprocs(num_cores)
 
+println("Activating Environment")
+
 # instantiate and precompile environment
 @everywhere begin
-  using Pkg;Pkg.activate(@__DIR__); 
+  using Pkg;Pkg.activate("."); 
   Pkg.instantiate(); Pkg.precompile()
 end
 
+println("Importing Packages/Functions")
+
 #For parallel
-@everywhere include(joinpath(@__DIR__,"workflow/toy_model/src/toy_ABM_functions.jl"))
-@everywhere include(joinpath(@__DIR__,"workflow/toy_model/src/damage_realizations.jl"))
+@everywhere include(joinpath(@__DIR__,"src/toy_ABM_functions.jl"))
+@everywhere include(joinpath(@__DIR__,"src/damage_realizations.jl"))
 @everywhere begin
     using GlobalSensitivity
     using DataStructures
@@ -54,6 +58,9 @@ end
 #create variable of vector bounds
 var_vec = [(0,1),(0.25,0.5),(0,0.05),(3,15),(0,0.1),(0.01,0.05)]
 #Run Method of Morris
+
+println("Starting Method of Morris")
+
 s = gsa(exp_shift, Morris(num_trajectory=100), var_vec)
 
 #Get mean and variance of EE 
@@ -61,7 +68,7 @@ param_avg = abs.(s.means)
 param_var = s.variances
 
 #Save To DataFrame
-using DataFrames, CSV
+println("Saving Results to DataFrame")
 
 MoM_results = DataFrame(params=["Risk Averse", "Breach Likelihood", "Pop. Growth", "Flood Memory", "Expectation Effect", "Base Move Prob."],
           exp_mean = param_avg[1,:],
