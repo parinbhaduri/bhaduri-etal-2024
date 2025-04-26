@@ -61,7 +61,7 @@ var_vec = [(0,1),(0.25,0.5),(0,0.05),(3,15),(0,0.1),(0.01,0.05)]
 
 println("Starting Method of Morris")
 
-s = gsa(exp_shift, Morris(num_trajectory=100), var_vec)
+s = gsa(exp_shift, Morris(num_trajectory=100, relative_scale=true), var_vec)
 
 #Get mean and variance of EE 
 param_avg = abs.(s.means)
@@ -75,4 +75,4 @@ MoM_results = DataFrame(params=["Risk Averse", "Breach Likelihood", "Pop. Growth
           exp_var = param_var[1,:]
 )
 
-CSV.write(joinpath(@__DIR__, "SA_Results/MoM_results_ideal_100.csv"), MoM_results)
+CSV.write(joinpath(@__DIR__, "SA_Results/MoM_results_ideal_100_norm.csv"), MoM_results)

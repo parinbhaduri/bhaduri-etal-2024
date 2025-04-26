@@ -99,7 +99,7 @@ var_vec = [(0,1),(0,1),(0.0,0.02),(3,15),(0,0.01),(1,3)]
 
 println("Starting Method of Morris")
 
-s = gsa(balt_mom, Morris(num_trajectory=100), var_vec)
+s = gsa(balt_mom, Morris(num_trajectory=100, relative_scale=true), var_vec)
 
 #Get mean and variance of EE 
 param_avg = abs.(s.means)
@@ -113,4 +113,4 @@ MoM_results = DataFrame(params=["Risk Averse", "Breach", "Pop. Growth", "Flood M
           exp_var = param_var[1,:]
 )
 
-CSV.write(joinpath(@__DIR__, "SA_Results/MoM_results_balt_100.csv"), MoM_results)
+CSV.write(joinpath(@__DIR__, "SA_Results/MoM_results_balt_100_norm.csv"), MoM_results)
