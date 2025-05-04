@@ -37,6 +37,46 @@ hidespines!(ax2,:t, :r)
 CairoMakie.barplot!(ax1, sobol_results["firstorder"], color = colorant"#005F73")
 CairoMakie.barplot!(ax2, factor_import.value, color =colorant"#52A3B8")#, direction = :x)
 
+##Plot MoM results
+mom_df = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/SA_Results/MoM_results_ideal_100.csv")))
+mom_df_balt = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/SA_Results/MoM_results_balt_100.csv")))
+
+fig = Figure(size = (3600,1080), fontsize = 22, pt_per_unit = 1, figure_padding = 20)
+
+ax1 = Axis(fig[1,1:2], xticks = (1:6, mom_df[!,"params"]),                
+        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Idealized Experiment", titlealign = :left, titlesize = 24,
+         limits = (nothing, nothing), xgridvisible = false) #(0,0.8)
+hidespines!(ax1,:t, :r)
+
+ax2 = Axis(fig[2,1:2], xticks = (1:6, mom_df[!,"params"]), 
+        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Idealized Experiment", titlealign = :left, titlesize = 24,
+         limits = (nothing, nothing), xgridvisible = false)
+hidespines!(ax2,:t, :r)
+
+
+CairoMakie.barplot!(ax1, mom_df[!,"exp_mean"], color = colorant"#005F73")
+CairoMakie.barplot!(ax2, mom_df[!,"exp_var"], color =colorant"#E0BB00")#, direction = :x)
+
+display(fig)
+
+
+
+fig = Figure(size = (3600,1080), fontsize = 22, pt_per_unit = 1, figure_padding = 20)
+
+ax1 = Axis(fig[1,1:2], xticks = (1:6, mom_df_balt[!,"params"]),                
+        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Baltimore Experiment", titlealign = :left, titlesize = 24,
+         limits = (nothing, nothing), xgridvisible = false) #(0,0.8)
+hidespines!(ax1,:t, :r)
+
+ax2 = Axis(fig[2,1:2], xticks = (1:6, mom_df_balt[!,"params"]), 
+        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Baltimore Experiment", titlealign = :left, titlesize = 24,
+         limits = (nothing, nothing), xgridvisible = false)
+hidespines!(ax2,:t, :r)
+
+
+CairoMakie.barplot!(ax1, mom_df_balt[!,"exp_mean"], color = colorant"#52A3B8")
+CairoMakie.barplot!(ax2, mom_df_balt[!,"exp_var"], color =colorant"#FFE669")#, direction = :x)
+
 display(fig)
 
 CairoMakie.save(joinpath(pwd(),"figures/SA_visualize.png"), fig)

@@ -50,4 +50,41 @@ CSV.write(joinpath(@__DIR__,"dataframes/base_event_low_RA.csv"), base_damage)
 CSV.write(joinpath(@__DIR__,"dataframes/levee_event_low_RA.csv"), levee_damage)
 
 
+## Look at alternative benchmark scenario (0% growth, high and low RA)
+perc_growth = 0.0
+
+risk_averse = 0.3
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true
+)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage_no_growth.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage_no_growth.csv"), levee_damage)
+
+
+risk_averse = 0.7
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true
+)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_no_growth_low_RA.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_no_growth_low_RA.csv"), levee_damage)
+
+
+## Look at alternative benchmark scenario (2% growth, high and low RA)
+perc_growth = 0.02
+
+risk_averse = 0.3
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true
+)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_damage_two_growth.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_damage_two_growth.csv"), levee_damage)
+
+
+risk_averse = 0.7
+base_damage, levee_damage = risk_damage(balt_ddf, surge_breach, seed_range;slr_scen=slr_scen, no_of_years=no_of_years, perc_growth=perc_growth, house_choice_mode=house_choice_mode, flood_coefficient=flood_coefficient,
+    breach=breach, breach_null=breach_null, risk_averse=risk_averse, flood_mem=flood_mem, fixed_effect=fixed_effect, base_move=base_move, showprogress = true
+)
+CSV.write(joinpath(@__DIR__,"dataframes/base_event_two_growth_low_RA.csv"), base_damage)
+CSV.write(joinpath(@__DIR__,"dataframes/levee_event_two_growth_low_RA.csv"), levee_damage)
+
  
