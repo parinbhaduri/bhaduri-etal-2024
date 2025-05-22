@@ -26,14 +26,17 @@ occ_fe_7 = risk_shift(Elevation, seed_range; breach = false, fe = 0.7, parallel 
 CSV.write(joinpath(@__DIR__,"dataframes/fixed_effect_7.csv"), occ_fe_7)
 
 ## Model with Risk Aversion Changes
-occ_ra_base = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.3, parallel = true, showprogress = true)
-CSV.write(joinpath(@__DIR__,"dataframes/risk_averse_base.csv"), occ_ra_base)
+occ_bp_low_ra_hi = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.3, prob_move = 0.01, parallel = true, showprogress = true)
+CSV.write(joinpath(@__DIR__,"dataframes/bp_low_ra_hi.csv"), occ_bp_low_ra_hi)
 
-occ_ra_5 = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.5, parallel = true, showprogress = true)
-CSV.write(joinpath(@__DIR__,"dataframes/risk_averse_5.csv"), occ_ra_5)
+occ_bp_low_ra_low = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.7, prob_move = 0.01, parallel = true, showprogress = true)
+CSV.write(joinpath(@__DIR__,"dataframes/bp_low_ra_low.csv"), occ_bp_low_ra_low)
 
-occ_ra_7 = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.7, parallel = true, showprogress = true)
-CSV.write(joinpath(@__DIR__,"dataframes/risk_averse_7.csv"), occ_ra_7)
+occ_bp_hi_ra_hi = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.3, prob_move = 0.05, parallel = true, showprogress = true)
+CSV.write(joinpath(@__DIR__,"dataframes/bp_hi_ra_hi.csv"), occ_bp_hi_ra_hi)
+
+occ_bp_hi_ra_low = risk_shift(Elevation, seed_range; breach = false, risk_averse = 0.7, prob_move = 0.05, parallel = true, showprogress = true)
+CSV.write(joinpath(@__DIR__,"dataframes/bp_hi_ra_low.csv"), occ_bp_hi_ra_low)
 
 #remove parallel processors
 rmprocs(workers())
