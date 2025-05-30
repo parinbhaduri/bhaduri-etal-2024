@@ -92,22 +92,16 @@ pop_change = [(max_response.count_floodplain_fam[i] .- max_response.count_floodp
 fig = Figure(size = (1000, 1000), fontsize = 16, pt_per_unit = 1, figure_padding = 20)
 ga = fig[1, 1:2] = GridLayout()
 gb = fig[2, 1:2] = GridLayout()
-gc = fig[3, 1:2] = GridLayout()
 
 ax1 = Axis(ga[1, 1], ylabel = rich("Change in Population (count)"; font = :bold), xlabel = rich("Time Since Major Flood (years)"; font = :bold),
-title = " a. Floodplain Population Response after Major Flood Event in No Levee Scenario (Idealized)", titlesize = 18,
+title = " a. Floodplain Population Response after Major Flood Event in No Levee Scenario", titlesize = 18,
 limits = ((0,13), nothing), xgridvisible = false)
 hidespines!(ax1, :t, :r)
 
 ax2 = Axis(gb[1, 1], ylabel = rich("Difference in Population (count)"; font = :bold), xlabel = rich("Model Timestep (year)"; font = :bold),
-title = "b. Difference in Floodplain Population between Levee and No Levee Scenario (Idealized)", titlesize = 18, 
+title = "b. Difference in Floodplain Population between Levee and No Levee Scenario", titlesize = 18, 
 limits = ((0,50), (nothing, 400)), xgridvisible = false)
 hidespines!(ax2, :t, :r)
-
-ax3 = Axis(gc[1, 1], xlabel = rich("Difference in Population (count)"; font = :bold), ylabel = rich("Count"; font = :bold),
- title = "c. Difference in Final Floodplain Population between Levee and No Levee Scenario (Baltimore)", titlesize = 18, 
-  ygridvisible = false, xticks = ([-5e3, 0, 5e3, 1e4], ["-5000","0","5000","10000"]))
-hidespines!(ax3, :t, :r)
 
 
 Palette = ColorSchemes.okabe_ito
@@ -149,31 +143,9 @@ elem_2 = [LineElement(color = Palette[2], linestyle = nothing)]
 axislegend(ax2, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt, orientation = :horizontal,
  framevisible = false)
 
-
-#Plot Difference in floodplain population between levee and no levee scenario (Baltimore)
-balt_base_final_high = filter(row -> (row.step == 50), balt_base_high)
-balt_levee_final_high = filter(row -> (row.step == 50), balt_levee_high)
-
-balt_base_final_low = filter(row -> (row.step == 50), balt_base_low)
-balt_levee_final_low = filter(row -> (row.step == 50), balt_levee_low)
-
-balt_diff_high = balt_levee_final_high.sum_population_f_c_bgs .-  balt_base_final_high.sum_population_f_c_bgs
-balt_diff_low = balt_levee_final_low.sum_population_f_c_bgs .-  balt_base_final_low.sum_population_f_c_bgs
-
-CairoMakie.hist!(ax3, balt_diff_high, color = (Palette[1], 0.75))
-CairoMakie.hist!(ax3, balt_diff_low, color = (Palette[2], 0.75), offset = 1)
-
-#Create Legend
-elem_1 = [PolyElement(color = Palette[1])]
-elem_2 = [PolyElement(color = Palette[2])]
-
-
-axislegend(ax3, [elem_1, elem_2] , ["High Risk Aversion", "Low Risk Aversion"], position = :lt,
- orientation = :vertical, framevisible = false)
-
 display(fig)
 
-CairoMakie.save(joinpath(pwd(),"figures/abm_response_final.png"), fig)
+CairoMakie.save(joinpath(pwd(),"figures/abm_evolution_final.png"), fig)
 
 
 
