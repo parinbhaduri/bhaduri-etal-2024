@@ -23,33 +23,50 @@ factor_import = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C
 ##Plot analysis results
 fig = Figure(size = (3600,1080), fontsize = 16, pt_per_unit = 1, figure_padding = 20)
 
-ax1 = Axis(fig[1,1:2], xticks = (1:6, ["Risk Averse", "Breach Likelihood", "Pop. Growth", "Flood Memory", "Expectation Effect", "Base Move Prob."]),                
-        xticklabelrotation = pi/4, ylabel = rich("First-Order\n Sensitivity Index"; font = :bold), title = "a. Idealized Experiment", titlealign = :left, titlesize = 18,
+#ax1 = Axis(fig[1,1:2], xticks = (1:6, ["Risk Averse", "Breach Likelihood", "Pop. Growth", "Flood Memory", "Expectation Effect", "Base Move Prob."]),                
+#        xticklabelrotation = pi/4, ylabel = rich("First-Order\n Sensitivity Index"; font = :bold), title = "a. Idealized Experiment", titlealign = :left, titlesize = 18,
+#         limits = (nothing, (0,0.8)), xgridvisible = false)
+#hidespines!(ax1,:t, :r)
+
+ax1 = Axis(fig[1,1], xticks = (1:6, ["Risk Averse", "Pop. Growth", "Expectation Effect", "SLR", "Breach", "Flood Memory"]), 
+        xticklabelrotation = pi/4, ylabel = rich("Feature Importance"; font = :bold), #title = "b. Baltimore Experiment", titlealign = :left, titlesize = 18,
          limits = (nothing, (0,0.8)), xgridvisible = false)
 hidespines!(ax1,:t, :r)
 
-ax2 = Axis(fig[2,1:2], xticks = (1:6, ["Risk Averse", "Pop. Growth", "Expectation Effect", "SLR", "Breach", "Flood Memory"]), 
-        xticklabelrotation = pi/4, ylabel = rich("Feature Importance"; font = :bold), title = "b. Baltimore Experiment", titlealign = :left, titlesize = 18,
-         limits = (nothing, (0,0.8)), xgridvisible = false)
-hidespines!(ax2,:t, :r)
+
+#CairoMakie.barplot!(ax1, sobol_results["firstorder"], color = colorant"#005F73")
+CairoMakie.barplot!(ax1, factor_import.value, color =colorant"#52A3B8")#, direction = :x)
+display(fig)
+
+CairoMakie.save(joinpath(pwd(),"figures/scen_disc_balt.png"), fig)
 
 
-CairoMakie.barplot!(ax1, sobol_results["firstorder"], color = colorant"#005F73")
-CairoMakie.barplot!(ax2, factor_import.value, color =colorant"#52A3B8")#, direction = :x)
+
+
+
+
+
+
+
+
 
 ##Plot MoM results
-mom_df = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/SA_Results/MoM_results_ideal_100.csv")))
-mom_df_balt = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/SA_Results/MoM_results_balt_100.csv")))
+mom_df = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/SA_Results/MoM_results_ideal_100_norm.csv")))
+#mom_df_norm = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/toy_model/SA_Results/MoM_results_ideal_100.csv")))
+mom_df_balt = DataFrame(CSV.File(joinpath(dirname(@__DIR__),"workflow/CHANCE_C/SA_Results/MoM_results_balt_100_norm.csv")))
 
-fig = Figure(size = (3600,1080), fontsize = 22, pt_per_unit = 1, figure_padding = 20)
+sqrt.(mom_df[!,"exp_var"])
+sqrt.(mom_df_balt[!,"exp_var"])
+
+fig = Figure(size = (3600,1080), fontsize = 16, pt_per_unit = 1, figure_padding = 20)
 
 ax1 = Axis(fig[1,1:2], xticks = (1:6, mom_df[!,"params"]),                
-        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Idealized Experiment", titlealign = :left, titlesize = 24,
+        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Idealized Experiment", titlealign = :left, titlesize = 18,
          limits = (nothing, nothing), xgridvisible = false) #(0,0.8)
 hidespines!(ax1,:t, :r)
 
 ax2 = Axis(fig[2,1:2], xticks = (1:6, mom_df[!,"params"]), 
-        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Idealized Experiment", titlealign = :left, titlesize = 24,
+        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Idealized Experiment", titlealign = :left, titlesize = 18,
          limits = (nothing, nothing), xgridvisible = false)
 hidespines!(ax2,:t, :r)
 
@@ -61,15 +78,15 @@ display(fig)
 
 
 
-fig = Figure(size = (3600,1080), fontsize = 22, pt_per_unit = 1, figure_padding = 20)
+fig = Figure(size = (3600,1080), fontsize = 16, pt_per_unit = 1, figure_padding = 20)
 
 ax1 = Axis(fig[1,1:2], xticks = (1:6, mom_df_balt[!,"params"]),                
-        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Baltimore Experiment", titlealign = :left, titlesize = 24,
+        xticklabelrotation = pi/4, ylabel = rich("Mean of\n Elementary Effects"; font = :bold), title = "a. Baltimore Experiment", titlealign = :left, titlesize = 18,
          limits = (nothing, nothing), xgridvisible = false) #(0,0.8)
 hidespines!(ax1,:t, :r)
 
 ax2 = Axis(fig[2,1:2], xticks = (1:6, mom_df_balt[!,"params"]), 
-        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Baltimore Experiment", titlealign = :left, titlesize = 24,
+        xticklabelrotation = pi/4, ylabel = rich("Variance of\n Elementary Effects"; font = :bold), title = "b. Baltimore Experiment", titlealign = :left, titlesize = 18,
          limits = (nothing, nothing), xgridvisible = false)
 hidespines!(ax2,:t, :r)
 
